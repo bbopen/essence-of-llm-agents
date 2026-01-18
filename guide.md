@@ -401,151 +401,52 @@ async function coordinator(task) {
 
 ## 09. Quality
 
-> Validation catches errors. Quality catches slop. You can't inspect your way to good code.
+> Quality isn't a layer you add. It emerges from the system.
 
-### Where this came from
+### Deming's insight
 
-[Joseph Juran](https://www.juran.com/blog/the-juran-trilogy-2/ "The Quality Trilogy (1986)") drew the distinction in 1986. There are two kinds of problems: **sporadic spikes** (sudden errors, caught by control) and **chronic waste** (structural problems, requiring improvement). Validation catches the spikes. Quality addresses the waste.
+[W. Edwards Deming](https://asq.org/quality-resources/tqm/deming-points "Deming's 14 Points") said it plainly: *"Cease dependence on inspection to achieve quality."* You can't bolt quality on at the end. The quality, good or bad, is already in the product.
 
-[W. Edwards Deming](https://asq.org/quality-resources/tqm/deming-points "Deming's 14 Points") said it plainly in Point 3: *"Cease dependence on inspection to achieve quality."* Inspection is too late. The quality, good or bad, is already in the product.
+The architecture in this guide IS the quality system:
 
-### The distinction
+- **The loop (01)**: Feedback is quality. You observe results and adjust. Wiener's whole point.
+- **Verification (03)**: Brooks' safety layers catch errors before they execute.
+- **State (04)**: Event sourcing gives you replay, debugging, crash recovery. That's your audit trail.
+- **Evaluation (06)**: Statistical thinking. Run it 50 times, look at the distribution. Shift the distribution, not just fix bugs.
 
-| Type | Question | Catches |
-| --- | --- | --- |
-| Verification | Did we build it right? | Malformed JSON, type errors |
-| Validation | Did we build the right thing? | Unauthorized actions, policy violations |
-| Quality | Should we have built it this way? | 500 lines for a 20-line task |
+### What this doesn't catch
 
-[Barry Boehm](https://en.wikipedia.org/wiki/Software_verification_and_validation "Software V&V (1972)") named this in 1972. Most agent frameworks stop at validation. Production systems need all three.
+[Joseph Juran](https://www.juran.com/blog/the-juran-trilogy-2/ "The Quality Trilogy (1986)") distinguished **sporadic spikes** (sudden errors) from **chronic waste** (structural problems). The existing architecture handles sporadic spikes. What it doesn't automatically catch:
 
-### The asymmetry problem
+**Chronic waste**: The code works. Verification passes. But 500 lines for a 20-line task is still wrong.
 
-An agent generates code in minutes. A human reviews it in hours. This asymmetry compounds:
+**The asymmetry problem**: An agent generates in minutes. A human reviews in hours. If review time exceeds generation time by 10x, you don't have an efficiency gain. You have a bottleneck that happens to produce a lot of output.
 
-> "Only 3.4% of developers report both low hallucination rates AND high confidence in shipping AI code without human review."
-> — Qodo, *State of AI Code Quality* (2025)
+### Measuring chronic waste
 
-If review time exceeds generation time by 10x, you don't have an efficiency gain. You have a bottleneck that happens to produce a lot of output.
-
-### Quality workers
-
-In orchestration (Section 08), add independent quality review. Workers implement. Quality workers verify.
-
-`quality-workers.ts`
-
-```typescript
-// Quality workers: independent review in orchestration
-async function coordinator(task) {
-  const subtasks = analyze(task);
-
-  const results = await Promise.all(
-    subtasks.map(async (subtask) => {
-      // Implementation worker
-      const worker = selectWorker(subtask);
-      const result = await worker.execute(subtask);
-
-      // Quality worker (independent)
-      const reviewer = selectQualityWorker(subtask);
-      const review = await reviewer.assess(result, subtask);
-
-      if (!review.acceptable) {
-        return worker.revise(result, review.findings);
-      }
-      return result;
-    })
-  );
-
-  return combine(results);
-}
-```
-
-The quality worker is not the same as the implementation worker. Different prompt, different role, different incentives.
-
-### Chronic waste metrics
-
-Track quality over time. These metrics surface chronic waste that validation misses:
+Track these over time:
 
 - **Code churn**: Percentage rewritten within 2 weeks. High churn means the first output wasn't right.
-- **Proportionality**: Actual lines vs. expected lines. 500 lines for a 20-line task is a quality problem.
-- **Review time ratio**: Hours to review vs. minutes to generate. If this exceeds 10:1, the agent creates more work than it saves.
-- **Defect escape rate**: Issues found after merge vs. before. Quality catches problems early.
+- **Proportionality**: Actual lines vs. expected lines for the task.
+- **Review time ratio**: Hours to review vs. minutes to generate.
 
-`quality-metrics.ts`
+These surface chronic problems that verification misses.
 
-```typescript
-// Quality metrics: track chronic waste
-interface QualityMetrics {
-  // Code churn: rewrites indicate poor initial quality
-  churn: {
-    linesChanged: number;
-    linesTotal: number;
-    withinDays: number;
-    rate: number; // linesChanged / linesTotal
-  };
+### Stop the line
 
-  // Proportionality: output size vs expected
-  proportionality: {
-    actualLines: number;
-    expectedLines: number;
-    ratio: number; // actual / expected
-  };
-
-  // Review burden: human time vs machine time
-  reviewBurden: {
-    generationMinutes: number;
-    reviewMinutes: number;
-    ratio: number; // review / generation
-  };
-
-  // Defect escape: issues found late
-  defectEscape: {
-    foundBeforeMerge: number;
-    foundAfterMerge: number;
-    escapeRate: number; // after / (before + after)
-  };
-}
-
-function assessQualityHealth(metrics: QualityMetrics): QualityAssessment {
-  const concerns: string[] = [];
-
-  if (metrics.churn.rate > 0.3) {
-    concerns.push('High code churn suggests poor initial output');
-  }
-  if (metrics.proportionality.ratio > 5) {
-    concerns.push('Output significantly larger than expected');
-  }
-  if (metrics.reviewBurden.ratio > 10) {
-    concerns.push('Review time exceeds generation time by 10x');
-  }
-  if (metrics.defectEscape.escapeRate > 0.2) {
-    concerns.push('Too many defects escaping to production');
-  }
-
-  return {
-    healthy: concerns.length === 0,
-    concerns,
-  };
-}
-```
-
-### The Toyota principle
-
-[Toyota's production system](https://www.6sigma.us/manufacturing/jidoka-toyota-production-system/ "Jidoka") gives every worker the authority to stop the line when they see a defect. This is called **jidoka**: automation with a human touch.
-
-For agents: any quality check that fails should stop the pipeline. Don't let bad output accumulate downstream hoping someone will catch it later.
+When quality checks fail, don't continue hoping someone catches it downstream. This extends verification (03): if the output is wrong, stop.
 
 ```typescript
-// Jidoka: stop the line on quality failure
-if (!qualityCheck.passed) {
-  throw new QualityStop({
-    reason: qualityCheck.findings,
-    action: 'Review required before continuing',
+// Extend verification: stop on quality failure
+if (metrics.proportionality.ratio > 5) {
+  throw new VerificationError({
+    reason: 'Output 5x larger than expected',
+    action: 'Review before continuing',
   });
 }
 ```
 
-The point isn't to slow things down. The point is that fixing problems at the source is cheaper than fixing them downstream.
+This isn't a new layer. It's verification applied to chronic waste, not just sporadic errors.
 
 ## 10. Complete example
 
@@ -556,8 +457,7 @@ The point isn't to slow things down. The point is that fixing problems at the so
 1. **CLI:** Parse arguments, load config, wire things up
 2. **Ops:** Retry logic, circuit breakers, rate limits
 3. **Security:** Trifecta checks, sandboxing, input sanitization
-4. **Quality:** Chronic waste detection, proportionality checks
-5. **Agent:** The loop, tools, verification, state
+4. **Agent:** The loop, tools, verification, state
 
 ### Run it
 
@@ -581,26 +481,17 @@ while (this.canContinue()) {
   const response = await this.ops
     .callLlm(() => this.queryLLM());
 
-  // Verify it (Section 03)
+  // Verify it (Brooks' layers)
   const verified = await this.verifyResponse(response);
 
   // Run it
   const results = await this.executeTools(verified.toolCalls);
 
-  // Assess quality (Section 09)
-  const quality = await this.assessQuality(results, this.context);
-  if (!quality.acceptable) {
-    // Jidoka: stop the line
-    await this.handleQualityFailure(quality);
-    continue;
-  }
-
   // Record it (event sourcing)
-  this.updateState(results, quality);
+  this.updateState(results);
 }
 
 // That's the architecture.
-// Verification catches errors. Quality catches waste.
 ```
 
 The loop is the architecture. Everything else is infrastructure.
