@@ -149,7 +149,7 @@ Now add verification that catches 80% of mistakes:
 
 Verification turns a useless agent into one that works half the time. Add retries and you're in business.
 
-**Note:** This catches *sporadic* errors—malformed output, type mismatches, policy violations. It doesn't catch *chronic waste*—500 lines for a 20-line task. For that, see Section 10.
+**Note:** This catches *sporadic* errors—malformed output, type mismatches, policy violations. It doesn't catch *chronic waste*—500 lines for a 20-line task. For that, see Section 09.
 
 ### Safety layers (Brooks, 1986)
 
@@ -399,55 +399,7 @@ async function coordinator(task) {
 }
 ```
 
-## 09. Complete example
-
-> All of it together in one working system.
-
-### The stack
-
-1. **CLI:** Parse arguments, load config, wire things up
-2. **Ops:** Retry logic, circuit breakers, rate limits
-3. **Security:** Trifecta checks, sandboxing, input sanitization
-4. **Agent:** The loop, tools, validation, state
-
-### Run it
-
-```typescript
-npx ts-node run.ts "Create a hello world program"
-```
-
-### What you get
-
-A production agent. The theory goes back to 1948. The patterns come from teams running this in production today. The code is TypeScript you can read and modify.
-
-**Take it and make it yours.**
-
-`complete.ts`
-
-```typescript
-// Everything together: the complete agent architecture
-
-// The loop (Wiener, 1948)
-while (this.canContinue()) {
-  const response = await this.ops
-    .callLlm(() => this.queryLLM());
-
-  // Check it (deterministic)
-  const validated = await this.validateResponse(response);
-
-  // Run it
-  const results = await this.executeTools(validated.toolCalls);
-
-  // Record it (events)
-  this.updateState(results);
-}
-
-// That's the architecture.
-```
-
-The loop is the architecture. Everything else is infrastructure.
-
-## 10. Quality
+## 09. Quality
 
 > Validation catches errors. Quality catches slop. You can't inspect your way to good code.
 
@@ -683,6 +635,64 @@ if (!qualityCheck.passed) {
 ```
 
 The point isn't to slow things down. The point is that fixing problems at the source is cheaper than fixing them downstream.
+
+## 10. Complete example
+
+> All of it together in one working system.
+
+### The stack
+
+1. **CLI:** Parse arguments, load config, wire things up
+2. **Ops:** Retry logic, circuit breakers, rate limits
+3. **Security:** Trifecta checks, sandboxing, input sanitization
+4. **Quality:** Chronic waste detection, proportionality checks
+5. **Agent:** The loop, tools, verification, state
+
+### Run it
+
+```typescript
+npx ts-node run.ts "Create a hello world program"
+```
+
+### What you get
+
+A production agent. The theory goes back to 1948. The patterns come from teams running this in production today. The code is TypeScript you can read and modify.
+
+**Take it and make it yours.**
+
+`complete.ts`
+
+```typescript
+// Everything together: the complete agent architecture
+
+// The loop (Wiener, 1948)
+while (this.canContinue()) {
+  const response = await this.ops
+    .callLlm(() => this.queryLLM());
+
+  // Verify it (Section 03)
+  const verified = await this.verifyResponse(response);
+
+  // Run it
+  const results = await this.executeTools(verified.toolCalls);
+
+  // Assess quality (Section 09)
+  const quality = await this.assessQuality(results, this.context);
+  if (!quality.acceptable) {
+    // Jidoka: stop the line
+    await this.handleQualityFailure(quality);
+    continue;
+  }
+
+  // Record it (events, ALCOA-compliant)
+  this.updateState(results, quality);
+}
+
+// That's the architecture.
+// Verification catches errors. Quality catches waste.
+```
+
+The loop is the architecture. Everything else is infrastructure.
 
 ---
 

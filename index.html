@@ -38,8 +38,8 @@
     <a href="#evaluation" class="nav-link" data-section="8">06</a>
     <a href="#ops" class="nav-link" data-section="9">07</a>
     <a href="#orchestration" class="nav-link" data-section="10">08</a>
-    <a href="#complete" class="nav-link" data-section="11">09</a>
-    <a href="#quality" class="nav-link" data-section="12">10</a>
+    <a href="#quality" class="nav-link" data-section="11">09</a>
+    <a href="#complete" class="nav-link" data-section="12">10</a>
   </nav>
 
   <main class="main">
@@ -231,7 +231,7 @@
         <p>Now add verification that catches 80% of mistakes:</p>
         <p class="math"><code class="inline-code">0.94^10 = 53.8%</code></p>
         <p>Verification turns a useless agent into one that works half the time. Add retries and you're in business.</p>
-        <p class="note-callout"><strong>Note:</strong> This catches <em>sporadic</em> errors—malformed output, type mismatches, policy violations. It doesn't catch <em>chronic waste</em>—500 lines for a 20-line task. For that, see Section 10.</p>
+        <p class="note-callout"><strong>Note:</strong> This catches <em>sporadic</em> errors—malformed output, type mismatches, policy violations. It doesn't catch <em>chronic waste</em>—500 lines for a 20-line task. For that, see Section 09.</p>
 
         <h3>Safety layers (Brooks, 1986)</h3>
         <p><a href="papers/brooks-1986-robust-layered.pdf" class="citation" title="A Robust Layered Control System For A Mobile Robot"><span class="highlight--cyan">Rodney Brooks</span></a> built robots at MIT. His rule: lower layers override higher layers. Safety beats efficiency. Efficiency beats the goal. The goal never overrides safety.</p>
@@ -528,64 +528,10 @@
       </div>
     </section>
 
-    <!-- Chapter 9: Complete -->
-    <section id="complete" class="section section--final">
-      <header class="section__header">
-        <span class="section__number">09</span>
-        <h2 class="section__title">Complete example</h2>
-      </header>
-
-      <div class="content">
-        <p class="lede">All of it together in one working system.</p>
-
-        <h3>The stack</h3>
-        <ol class="list list--numbered">
-          <li><strong>CLI:</strong> Parse arguments, load config, wire things up</li>
-          <li><strong>Ops:</strong> Retry logic, circuit breakers, rate limits</li>
-          <li><strong>Security:</strong> Trifecta checks, sandboxing, input sanitization</li>
-          <li><strong>Agent:</strong> The loop, tools, validation, state</li>
-        </ol>
-
-        <h3>Run it</h3>
-        <div class="code-block code-block--inline">
-          <pre><code>npx ts-node run.ts "Create a hello world program"</code></pre>
-        </div>
-
-        <h3>What you get</h3>
-        <p>A production agent. The theory goes back to 1948. The patterns come from teams running this in production today. The code is TypeScript you can read and modify.</p>
-        <p><strong>Take it and make it yours.</strong></p>
-
-        <div class="code-block" data-title="complete.ts">
-          <pre><code><span class="line"><span class="cmt">// Everything together: the complete agent architecture</span></span>
-<span class="line"></span>
-<span class="line highlighted"><span class="cmt">// The loop (Wiener, 1948)</span></span>
-<span class="line highlighted"><span class="kw">while</span> (<span class="kw">this</span>.<span class="fn">canContinue</span>()) { <span class="note" data-note="canContinue() checks: not done, within budget, no fatal errors. The loop runs until explicit completion or resource exhaustion.">// Wiener's feedback loop</span></span>
-<span class="line stochastic">  <span class="kw">const</span> response = <span class="kw">await this</span>.ops <span class="note" data-note="ops layer wraps LLM calls with retry, rate limiting, circuit breaker. The agent doesn't know about infrastructure.">// ops handles infra</span></span>
-<span class="line stochastic">    .<span class="fn">callLlm</span>(() => <span class="kw">this</span>.<span class="fn">queryLLM</span>()); <span class="note" data-note="This is the ONLY stochastic line. The LLM decides what to do. Everything else is deterministic code you wrote.">// STOCHASTIC</span></span>
-<span class="line"></span>
-<span class="line deterministic">  <span class="cmt">// Check it (deterministic)</span></span>
-<span class="line deterministic">  <span class="kw">const</span> validated = <span class="kw">await this</span>.<span class="fn">validateResponse</span>(response); <span class="note" data-note="Brooks' safety layers run here. Level 0-2 checks before any action. Fails fast on policy violations.">// Brooks' layers</span></span>
-<span class="line"></span>
-<span class="line deterministic">  <span class="cmt">// Run it</span></span>
-<span class="line deterministic">  <span class="kw">const</span> results = <span class="kw">await this</span>.<span class="fn">executeTools</span>(validated.toolCalls); <span class="note" data-note="Your code runs the tools. You control sandboxing, permissions, timeouts. The LLM only suggested; you decide what executes.">// DETERMINISTIC</span></span>
-<span class="line"></span>
-<span class="line deterministic">  <span class="cmt">// Record it (events)</span></span>
-<span class="line deterministic">  <span class="kw">this</span>.<span class="fn">updateState</span>(results); <span class="note" data-note="Event sourcing: append results to the log. State is derived. This enables replay, debugging, crash recovery.">// event sourcing</span></span>
-<span class="line">} <span class="note" data-note="The loop continues until done tool is called or resources exhausted. That's the entire architecture. Everything else is infrastructure around this.">// repeat until done</span></span>
-<span class="line"></span>
-<span class="line"><span class="cmt">// That's the architecture.</span></span></code></pre>
-        </div>
-
-        <div class="finale">
-          <p class="finale__text">The loop is the architecture.<br>Everything else is infrastructure.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Chapter 10: Quality -->
+    <!-- Chapter 9: Quality -->
     <section id="quality" class="section">
       <header class="section__header">
-        <span class="section__number">10</span>
+        <span class="section__number">09</span>
         <h2 class="section__title">Quality</h2>
       </header>
 
@@ -771,6 +717,69 @@
 <span class="line highlighted">}</span></code></pre>
         </div>
         <p>The point isn't to slow things down. The point is that fixing problems at the source is cheaper than fixing them downstream.</p>
+      </div>
+    </section>
+
+    <!-- Chapter 10: Complete -->
+    <section id="complete" class="section section--final">
+      <header class="section__header">
+        <span class="section__number">10</span>
+        <h2 class="section__title">Complete example</h2>
+      </header>
+
+      <div class="content">
+        <p class="lede">All of it together in one working system.</p>
+
+        <h3>The stack</h3>
+        <ol class="list list--numbered">
+          <li><strong>CLI:</strong> Parse arguments, load config, wire things up</li>
+          <li><strong>Ops:</strong> Retry logic, circuit breakers, rate limits</li>
+          <li><strong>Security:</strong> Trifecta checks, sandboxing, input sanitization</li>
+          <li><strong>Quality:</strong> Chronic waste detection, proportionality checks</li>
+          <li><strong>Agent:</strong> The loop, tools, verification, state</li>
+        </ol>
+
+        <h3>Run it</h3>
+        <div class="code-block code-block--inline">
+          <pre><code>npx ts-node run.ts "Create a hello world program"</code></pre>
+        </div>
+
+        <h3>What you get</h3>
+        <p>A production agent. The theory goes back to 1948. The patterns come from teams running this in production today. The code is TypeScript you can read and modify.</p>
+        <p><strong>Take it and make it yours.</strong></p>
+
+        <div class="code-block" data-title="complete.ts">
+          <pre><code><span class="line"><span class="cmt">// Everything together: the complete agent architecture</span></span>
+<span class="line"></span>
+<span class="line highlighted"><span class="cmt">// The loop (Wiener, 1948)</span></span>
+<span class="line highlighted"><span class="kw">while</span> (<span class="kw">this</span>.<span class="fn">canContinue</span>()) { <span class="note" data-note="canContinue() checks: not done, within budget, no fatal errors. The loop runs until explicit completion or resource exhaustion.">// Wiener's feedback loop</span></span>
+<span class="line stochastic">  <span class="kw">const</span> response = <span class="kw">await this</span>.ops <span class="note" data-note="ops layer wraps LLM calls with retry, rate limiting, circuit breaker. The agent doesn't know about infrastructure.">// ops handles infra</span></span>
+<span class="line stochastic">    .<span class="fn">callLlm</span>(() => <span class="kw">this</span>.<span class="fn">queryLLM</span>()); <span class="note" data-note="This is the ONLY stochastic line. The LLM decides what to do. Everything else is deterministic code you wrote.">// STOCHASTIC</span></span>
+<span class="line"></span>
+<span class="line deterministic">  <span class="cmt">// Verify it (Section 03)</span></span>
+<span class="line deterministic">  <span class="kw">const</span> verified = <span class="kw">await this</span>.<span class="fn">verifyResponse</span>(response); <span class="note" data-note="Brooks' safety layers run here. Level 0-2 checks before any action. Fails fast on policy violations.">// Brooks' layers</span></span>
+<span class="line"></span>
+<span class="line deterministic">  <span class="cmt">// Run it</span></span>
+<span class="line deterministic">  <span class="kw">const</span> results = <span class="kw">await this</span>.<span class="fn">executeTools</span>(verified.toolCalls); <span class="note" data-note="Your code runs the tools. You control sandboxing, permissions, timeouts. The LLM only suggested; you decide what executes.">// DETERMINISTIC</span></span>
+<span class="line"></span>
+<span class="line deterministic">  <span class="cmt">// Assess quality (Section 09)</span></span>
+<span class="line deterministic">  <span class="kw">const</span> quality = <span class="kw">await this</span>.<span class="fn">assessQuality</span>(results, <span class="kw">this</span>.context); <span class="note" data-note="Juran's insight: catch chronic waste, not just sporadic errors. Proportionality, churn, review burden.">// Juran's quality</span></span>
+<span class="line deterministic">  <span class="kw">if</span> (!quality.acceptable) { <span class="note" data-note="Jidoka: stop the line on quality failure. Don't let bad output accumulate downstream.">// jidoka</span></span>
+<span class="line deterministic">    <span class="kw">await this</span>.<span class="fn">handleQualityFailure</span>(quality);</span>
+<span class="line deterministic">    <span class="kw">continue</span>;</span>
+<span class="line deterministic">  }</span>
+<span class="line"></span>
+<span class="line deterministic">  <span class="cmt">// Record it (ALCOA-compliant)</span></span>
+<span class="line deterministic">  <span class="kw">this</span>.<span class="fn">updateState</span>(results, quality); <span class="note" data-note="Event sourcing with ALCOA: attributable, legible, contemporaneous, original, accurate.">// pharma-grade audit</span></span>
+<span class="line">} <span class="note" data-note="The loop continues until done tool is called or resources exhausted. That's the entire architecture. Everything else is infrastructure around this.">// repeat until done</span></span>
+<span class="line"></span>
+<span class="line"><span class="cmt">// That's the architecture.</span></span>
+<span class="line"><span class="cmt">// Verification catches errors. Quality catches waste.</span></span></code></pre>
+        </div>
+
+        <div class="finale">
+          <p class="finale__text">The loop is the architecture.<br>Everything else is infrastructure.</p>
+        </div>
       </div>
     </section>
   </main>
