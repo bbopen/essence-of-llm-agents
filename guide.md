@@ -95,7 +95,7 @@ This is Wiener's feedback loop, applied to LLMs.
 
 ### What an LLM actually does
 
-[Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents "Effective Context Engineering for AI Agents") calls it *context engineering*—not prompt engineering. You're not crafting magic words. You're managing a finite resource: the context window.
+[Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents "Effective Context Engineering for AI Agents") calls it *context engineering*, not prompt engineering. You're not crafting magic words. You're managing a finite resource: the context window.
 
 The LLM predicts the next token based on everything before it. Reasoning emerges from this prediction at scale. Your job is to give it the right context so the next token is useful.
 
@@ -150,9 +150,7 @@ const skills = [
 // Claude reads descriptions and matches intent
 ```
 
-**What it gets right:** The principle is sound—don't load 10,000 tokens of instructions when you only need 500. Selection via LLM reasoning (read descriptions, match intent) avoids the complexity of embedding-based retrieval.
-
-**What's worth noting:** The three-level system is Claude Code's implementation. The underlying principle is simpler: load instructions when the task needs them. A flat list of skills with on-demand loading achieves most of the benefit.
+The principle works: don't load 10,000 tokens of instructions when you only need 500. Selection via LLM reasoning (read descriptions, match intent) avoids the complexity of embedding-based retrieval. Claude Code's three-level system is one implementation, but the underlying idea is simpler. Load instructions when the task needs them. A flat list of skills with on-demand loading gets you most of the benefit.
 
 ### Context anchors
 
@@ -164,19 +162,15 @@ Write state to files. Read it back. This puts critical information where the mod
 
 ### Recursive Language Models
 
-[Recursive Language Models](https://arxiv.org/html/2512.24601v1 "Recursive Language Models, MIT 2025") treat context as an external environment—the model writes Python to query what it needs via a REPL.
+[Recursive Language Models](https://arxiv.org/html/2512.24601v1 "Recursive Language Models, MIT 2025") treat context as an external environment. The model writes Python to query what it needs via a REPL. MIT reports 3x cost reduction because the model only views what's relevant, validating our priority: compaction over summarization.
 
-**What they get right:** Selective access beats cramming. MIT reports 3x cost reduction because the model only views what's relevant. This validates our priority: compaction over summarization.
-
-**What's worth noting:** You probably don't need a REPL layer. Writing state to files and reading it back (Section 05) achieves selective access more simply. RLMs validate the principle; most production agents don't need the implementation.
+You probably don't need a REPL layer. Writing state to files and reading it back (Section 05) achieves the same selective access more simply.
 
 ### Observation masking
 
 [JetBrains](https://blog.jetbrains.com/research/2025/12/efficient-context-management/ "The Complexity Trap, NeurIPS 2025") found that simple masking (omitting tool outputs from context) halves costs while matching summarization quality. The key insight: the model doesn't need to see everything it produces, just the parts relevant to the next step.
 
-**What they get right:** Instead of expensive summarization, mark outputs as ephemeral. The model retains what matters through its own attention patterns rather than explicit compression.
-
-**What's worth noting:** This works best for intermediate results (search outputs, API responses) where the final artifact matters more than the path. Full context still beats masking when debugging or when you need to explain how you got there.
+Instead of expensive summarization, mark outputs as ephemeral. The model retains what matters through its own attention patterns. This works best for intermediate results (search outputs, API responses) where the final artifact matters more than the path. Keep full context when debugging or when you need to explain how you got there.
 
 ## 03. Tools
 
@@ -224,7 +218,7 @@ Start generous. Restrict based on evidence.
 
 ### MCP: the de facto standard
 
-[Model Context Protocol](https://modelcontextprotocol.io/specification/2025-11-25 "MCP Specification") won. [~40 million monthly SDK downloads](https://npmtrends.com/@modelcontextprotocol/sdk "MCP SDK npm trends") as of January 2026. [Donated to the Linux Foundation](https://www.anthropic.com/news/model-context-protocol-a2a-linux-foundation "MCP joins Linux Foundation") December 2025. Think of it as USB-C for AI—one protocol for many capabilities.
+[Model Context Protocol](https://modelcontextprotocol.io/specification/2025-11-25 "MCP Specification") won. [~40 million monthly SDK downloads](https://npmtrends.com/@modelcontextprotocol/sdk "MCP SDK npm trends") as of January 2026. [Donated to the Linux Foundation](https://www.anthropic.com/news/model-context-protocol-a2a-linux-foundation "MCP joins Linux Foundation") December 2025. Think of it as USB-C for AI: one protocol for many capabilities.
 
 MCP defines three primitives:
 
@@ -238,7 +232,7 @@ One interface. Any tool provider. Your agent doesn't care if the database tool c
 
 ### Token efficiency
 
-These patterns aren't part of MCP—they're Anthropic-specific features that work alongside any tool interface. Token-efficient tool mode graduated from beta with Claude 4. [Anthropic's research](https://www.anthropic.com/engineering/advanced-tool-use "Advanced Agentic Patterns") shows significant context savings:
+These patterns aren't part of MCP. They're Anthropic-specific features that work alongside any tool interface. Token-efficient tool mode graduated from beta with Claude 4. [Anthropic's research](https://www.anthropic.com/engineering/advanced-tool-use "Advanced Agentic Patterns") shows significant context savings:
 
 **Tool Search:** Don't load all tools upfront. Use `defer_loading: true` and let the agent discover tools on demand. Anthropic reports [85% fewer tokens](https://www.anthropic.com/engineering/advanced-tool-use "Advanced Tool Use") in their testing. *Note: This is Anthropic API-specific, not a general MCP feature.*
 
@@ -282,7 +276,7 @@ Now add verification that catches 80% of mistakes:
 
 The specific numbers will vary by task and model, but the principle holds: verification compounds. Without it, multi-step success rates collapse. With it, you have a chance.
 
-**Note:** This catches *sporadic* errors—malformed output, type mismatches, policy violations. It doesn't catch *chronic waste*—500 lines for a 20-line task. For that, see Section 10.
+**Note:** This catches *sporadic* errors: malformed output, type mismatches, policy violations. It doesn't catch *chronic waste*: 500 lines for a 20-line task. For that, see Section 10.
 
 ### Safety layers (Brooks, 1986)
 
@@ -326,19 +320,17 @@ Any single check can be bypassed. The attacker has to beat all of them.
 
 Stack defenses across different points: input validation catches malformed requests, policy checks catch unauthorized actions, output filtering catches leaked secrets, sandboxing contains damage from what slips through. [OWASP's agent security guidance](https://owasp.org/www-project-top-10-for-large-language-model-applications/ "OWASP LLM Top 10") recommends this layered approach.
 
-**What this gets right:** When the sanitizer misses an injection, the policy layer might still block the action. When policy fails, the sandbox limits the blast radius.
-
-**What's worth noting:** Defense in depth isn't about paranoia—it's about acknowledging that each layer has blind spots. The goal isn't perfect security at each layer. It's enough overlap that attackers can't thread the gaps.
+When the sanitizer misses an injection, the policy layer might still block the action. When policy fails, the sandbox limits the blast radius. Each layer has blind spots. The goal is enough overlap that attackers can't thread the gaps.
 
 ### Hooks: integration points for verification
 
-[Claude Code hooks](https://code.claude.com/docs/en/hooks "Claude Code Hooks Reference") are shell commands that run at lifecycle events. They don't implement Brooks' layers—they provide integration points where *you* can implement them. Your verification code runs at defined points:
+[Claude Code hooks](https://code.claude.com/docs/en/hooks "Claude Code Hooks Reference") are shell commands that run at lifecycle events. They don't implement Brooks' layers. They provide integration points where *you* can implement them. Your verification code runs at defined points:
 
 - **PreToolUse:** Before any tool executes. *You* enforce Layer 0-2 here. Can modify inputs via `additionalContext`.
 - **PostToolUse:** After execution. Run linters, formatters, tests.
 - **Stop:** Before the agent completes. Final validation.
 
-Hooks can do more than block. PreToolUse can modify inputs—sanitize arguments, inject additional context, transform parameters before the tool sees them. Hooks can also be scoped to specific tools or skills—a code-review skill might have stricter linting hooks than a general assistant.
+Hooks can do more than block. PreToolUse can modify inputs: sanitize arguments, inject additional context, transform parameters before the tool sees them. Hooks can also be scoped to specific tools or skills—a code-review skill might have stricter linting hooks than a general assistant.
 
 `hooks.json`
 
@@ -365,11 +357,9 @@ The theory said "lower layers win." Hooks are where you make that happen in code
 
 Hooks tell you *when* to check. But what rules do you check?
 
-[Cedar](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-understanding-cedar.html "Cedar Policy Language for AWS AgentCore") and [AgentSpec](https://arxiv.org/abs/2503.18666 "AgentSpec: Customizable Runtime Guardrails, ICSE 2026") are current attempts. Cedar is AWS's production implementation—declarative permit/deny rules evaluated at a gateway. AgentSpec is academic—a DSL with 90% prevention rate in research evaluations.
+[Cedar](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-understanding-cedar.html "Cedar Policy Language for AWS AgentCore") and [AgentSpec](https://arxiv.org/abs/2503.18666 "AgentSpec: Customizable Runtime Guardrails, ICSE 2026") are current attempts. Cedar is AWS's production implementation: declarative permit/deny rules evaluated at a gateway. AgentSpec is academic: a DSL with 90% prevention rate in research evaluations.
 
-**What they get right:** Rules in deterministic code can't be argued with. The agent never sees tools it isn't permitted to use.
-
-**Where they overcomplicate:** Most teams don't need a new language. A TypeScript function validating against a rule set achieves the same thing:
+Rules in deterministic code can't be argued with. The agent never sees tools it isn't permitted to use. But most teams don't need a new language. A TypeScript function validating against a rule set works fine:
 
 ```typescript
 // You probably don't need Cedar. This works.
@@ -384,7 +374,7 @@ function isPermitted(action, context) {
 }
 ```
 
-Cedar's value is governance at scale—many agents, auditable policies, compliance requirements. For one agent, you probably don't need it.
+Cedar's value is governance at scale: many agents, auditable policies, compliance requirements. For one agent, you probably don't need it.
 
 ## 05. State and memory
 
@@ -436,7 +426,7 @@ class EventStore {
 
 ### Context management
 
-[Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents "Effective Context Engineering") calls context a finite, precious resource. [Jason Liu](https://jxnl.co/writing/2025/08/30/context-engineering-compaction/ "Context Engineering: Compaction") frames compaction as preserving "optimization trajectories"—the reasoning path that got you here.
+[Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents "Effective Context Engineering") calls context a finite, precious resource. [Jason Liu](https://jxnl.co/writing/2025/08/30/context-engineering-compaction/ "Context Engineering: Compaction") frames compaction as preserving "optimization trajectories": the reasoning path that got you here.
 
 Based on these insights, we prioritize (our synthesis):
 
@@ -469,7 +459,7 @@ function manageContext(messages, limit) {
 }
 ```
 
-State survives context limits when you write it to files. Skills, todo lists, checkpoints—all filesystem. The context window can reset. The files remain.
+State survives context limits when you write it to files. Skills, todo lists, checkpoints: all filesystem. The context window can reset. The files remain.
 
 ## 06. Security
 
@@ -529,9 +519,7 @@ function assessTrifectaRisk(assessment) {
 
 [Marc Brooker](https://brooker.co.za/blog/2026/01/12/agent-box.html "Agent Safety is a Box") names the pattern: a deterministic control layer *outside* the agent. All tool calls flow through a gateway. The gateway checks policy before execution.
 
-**What it gets right:** If your agent can be convinced to ignore system prompt constraints, you have a problem. If your gateway refuses unauthorized tools regardless of what the agent says, you have a solution. The agent can't reason its way past code.
-
-**What's worth noting:** If you're already routing tool calls through validation (which you should be after reading this section), you already have the box. Brooker's contribution is the clear mental model and the argument for why prompt-based safety is insufficient.
+If your agent can be convinced to ignore system prompt constraints, you have a problem. If your gateway refuses unauthorized tools regardless of what the agent says, you have a solution. The agent can't reason its way past code. If you're already validating tool calls (which you should), you have this pattern. Brooker's insight is the mental model: prompt-based safety alone isn't enough.
 
 ### New attack surfaces
 
@@ -577,8 +565,8 @@ An agent that works 70% of the time will sometimes pass your test and sometimes 
 
 Two metrics, different questions:
 
-- **pass@k**: Run k times, at least one succeeds. Measures *coverage*—can the agent ever solve this?
-- **pass^k**: Run k times, all succeed. Measures *reliability*—can you trust the agent in production?
+- **pass@k**: Run k times, at least one succeeds. Measures *coverage*: can the agent ever solve this?
+- **pass^k**: Run k times, all succeed. Measures *reliability*: can you trust the agent in production?
 
 [Holistic Evaluation of Language Models](https://crfm.stanford.edu/helm "HELM") uses both. A 90% pass@5 with 20% pass^5 means the agent can solve the problem but you can't predict when. Production needs pass^k.
 
@@ -605,9 +593,7 @@ test('agent works >80% of the time', async () => {
 
 When you can't write deterministic assertions, use another model to evaluate. [Prometheus 2](https://arxiv.org/abs/2405.01535 "Prometheus 2: Open Source LLM Judges") achieves near-human agreement on code quality judgments.
 
-**What it gets right:** Scales evaluation beyond what humans can review. Catches subtle issues that pattern matching misses.
-
-**What's worth noting:** Judge models have their own biases and blind spots. Calibrate against human judgments first. Use judges for screening, not final verdicts.
+LLM judges scale evaluation beyond what humans can review and catch subtle issues that pattern matching misses. But they have their own biases. Calibrate against human judgments first. Use judges for screening, not final verdicts.
 
 ### Variance matters
 
@@ -736,9 +722,7 @@ When workers share context, hallucinations propagate. Worker A hallucinates a fa
 
 Context isolation (above) is the defense. Each worker starts clean. Results go through the coordinator, which can verify before incorporating.
 
-**What this gets right:** Isolation treats each worker as untrusted input to the coordinator. The coordinator can validate claims, check sources, reject contradictions.
-
-**What's worth noting:** Full isolation isn't always practical. When workers need to share state (e.g., a codebase), bound what they can modify. Prefer immutable shared resources plus explicit handoffs for mutations.
+Isolation treats each worker as untrusted input. The coordinator validates claims, checks sources, rejects contradictions. Full isolation isn't always practical. When workers share state (a codebase, for example), bound what each can modify. Prefer immutable shared resources plus explicit handoffs for changes.
 
 ### What the coordinator keeps
 

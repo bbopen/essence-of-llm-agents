@@ -180,7 +180,7 @@
         <p class="lede">The LLM is a language function approximator. It emulates reasoning through language. That's it.</p>
 
         <h3>What an LLM actually does</h3>
-        <p><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" class="citation" title="Effective Context Engineering for AI Agents"><span class="highlight--cyan">Anthropic</span></a> calls it <em>context engineering</em>—not prompt engineering. You're not crafting magic words. You're managing a finite resource: the context window.</p>
+        <p><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" class="citation" title="Effective Context Engineering for AI Agents"><span class="highlight--cyan">Anthropic</span></a> calls it <em>context engineering</em>, not prompt engineering. You're not crafting magic words. You're managing a finite resource: the context window.</p>
         <p>The LLM predicts the next token based on everything before it. Reasoning emerges from this prediction at scale. Your job is to give it the right context so the next token is useful.</p>
 
         <h3>The right altitude</h3>
@@ -227,8 +227,7 @@
 <span class="line"><span class="cmt">// Claude reads descriptions and matches intent</span></span></code></pre>
         </div>
 
-        <p><strong>What it gets right:</strong> The principle is sound—don't load 10,000 tokens of instructions when you only need 500. Selection via LLM reasoning (read descriptions, match intent) avoids the complexity of embedding-based retrieval.</p>
-        <p><strong>What's worth noting:</strong> The three-level system is Claude Code's implementation. The underlying principle is simpler: load instructions when the task needs them. A flat list of skills with on-demand loading achieves most of the benefit.</p>
+        <p>The principle works: don't load 10,000 tokens of instructions when you only need 500. Selection via LLM reasoning (read descriptions, match intent) avoids the complexity of embedding-based retrieval. Claude Code's three-level system is one implementation, but the underlying idea is simpler. Load instructions when the task needs them. A flat list of skills with on-demand loading gets you most of the benefit.</p>
 
         <h3>Context anchors</h3>
         <p>Context windows have a problem: information in the middle gets less attention than the beginning and end. <a href="https://promptengineering.org/agents-at-work-the-2026-playbook-for-building-reliable-agentic-workflows/" class="citation" title="2026 Playbook for Reliable Agentic Workflows">Agents at Work</a> found that todo lists help:</p>
@@ -240,14 +239,12 @@
         <p>Write state to files. Read it back. This puts critical information where the model pays attention.</p>
 
         <h3>Recursive Language Models</h3>
-        <p><a href="https://arxiv.org/html/2512.24601v1" class="citation" title="Recursive Language Models, MIT 2025"><span class="highlight--cyan">Recursive Language Models</span></a> treat context as an external environment—the model writes Python to query what it needs via a REPL.</p>
-        <p><strong>What they get right:</strong> Selective access beats cramming. MIT reports 3x cost reduction because the model only views what's relevant. This validates our priority: compaction over summarization.</p>
-        <p><strong>What's worth noting:</strong> You probably don't need a REPL layer. Writing state to files and reading it back (Section 05) achieves selective access more simply. RLMs validate the principle; most production agents don't need the implementation.</p>
+        <p><a href="https://arxiv.org/html/2512.24601v1" class="citation" title="Recursive Language Models, MIT 2025"><span class="highlight--cyan">Recursive Language Models</span></a> treat context as an external environment. The model writes Python to query what it needs via a REPL. MIT reports 3x cost reduction because the model only views what's relevant, validating our priority: compaction over summarization.</p>
+        <p>You probably don't need a REPL layer. Writing state to files and reading it back (Section 05) achieves the same selective access more simply.</p>
 
         <h3>Observation masking</h3>
         <p><a href="https://blog.jetbrains.com/research/2025/12/efficient-context-management/" class="citation" title="The Complexity Trap, NeurIPS 2025"><span class="highlight--cyan">JetBrains</span></a> found that simple masking (omitting tool outputs from context) halves costs while matching summarization quality. The key insight: the model doesn't need to see everything it produces, just the parts relevant to the next step.</p>
-        <p><strong>What they get right:</strong> Instead of expensive summarization, mark outputs as ephemeral. The model retains what matters through its own attention patterns rather than explicit compression.</p>
-        <p><strong>What's worth noting:</strong> This works best for intermediate results (search outputs, API responses) where the final artifact matters more than the path. Full context still beats masking when debugging or when you need to explain how you got there.</p>
+        <p>Instead of expensive summarization, mark outputs as ephemeral. The model retains what matters through its own attention patterns. This works best for intermediate results (search outputs, API responses) where the final artifact matters more than the path. Keep full context when debugging or when you need to explain how you got there.</p>
       </div>
     </section>
 
@@ -309,7 +306,7 @@
         <p><strong>Security note:</strong> Adoption outpaced security hardening. <a href="https://www.docker.com/blog/mcp-security-issues-threatening-ai-infrastructure/" class="citation" title="MCP Security Issues Threatening AI Infrastructure">Equixly's audit</a> found 43% of tested MCP servers had command injection vulnerabilities. <a href="https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks" class="citation" title="MCP Security: Tool Poisoning Attacks">Invariant Labs</a> documented tool poisoning attacks. The protocol is sound; implementations need scrutiny. Treat third-party MCP servers like third-party npm packages—audit before trusting.</p>
 
         <h3>Token efficiency</h3>
-        <p>These patterns aren't part of MCP—they're Anthropic-specific features that work alongside any tool interface. Token-efficient tool mode graduated from beta with Claude 4. <a href="https://www.anthropic.com/engineering/advanced-tool-use" class="citation" title="Advanced Agentic Patterns"><span class="highlight--cyan">Anthropic's research</span></a> shows significant context savings:</p>
+        <p>These patterns aren't part of MCP. They're Anthropic-specific features that work alongside any tool interface. Token-efficient tool mode graduated from beta with Claude 4. <a href="https://www.anthropic.com/engineering/advanced-tool-use" class="citation" title="Advanced Agentic Patterns"><span class="highlight--cyan">Anthropic's research</span></a> shows significant context savings:</p>
         <ul class="list">
           <li><strong>Tool Search:</strong> Don't load all tools upfront. Use <code class="inline-code">defer_loading: true</code> and let the agent discover tools on demand. Anthropic reports 85% fewer tokens. <em>Note: Anthropic API-specific, not a general MCP feature.</em></li>
           <li><strong>Programmatic Calling:</strong> Let code execution filter results before they hit context. Query returns 10,000 rows? <a href="https://www.anthropic.com/engineering/code-execution-with-mcp" class="citation" title="Code Execution with MCP">Filter to 10 in the sandbox</a>. ~37% typical reduction—more for bulk data.</li>
@@ -391,11 +388,10 @@
         <h3>Defense in depth</h3>
         <p>Any single check can be bypassed. The attacker has to beat all of them.</p>
         <p>Stack defenses across different points: input validation catches malformed requests, policy checks catch unauthorized actions, output filtering catches leaked secrets, sandboxing contains damage from what slips through. <a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/" class="citation" title="OWASP LLM Top 10">OWASP's agent security guidance</a> recommends this layered approach.</p>
-        <p><strong>What this gets right:</strong> When the sanitizer misses an injection, the policy layer might still block the action. When policy fails, the sandbox limits the blast radius.</p>
-        <p><strong>What's worth noting:</strong> Defense in depth isn't about paranoia—it's about acknowledging that each layer has blind spots. The goal isn't perfect security at each layer. It's enough overlap that attackers can't thread the gaps.</p>
+        <p>When the sanitizer misses an injection, the policy layer might still block the action. When policy fails, the sandbox limits the blast radius. Each layer has blind spots. The goal is enough overlap that attackers can't thread the gaps.</p>
 
         <h3>Hooks: integration points for verification</h3>
-        <p><a href="https://code.claude.com/docs/en/hooks" class="citation" title="Claude Code Hooks Reference"><span class="highlight--cyan">Claude Code hooks</span></a> are shell commands that run at lifecycle events. They don't implement Brooks' layers—they provide integration points where <em>you</em> can implement them. Your verification code runs at defined points:</p>
+        <p><a href="https://code.claude.com/docs/en/hooks" class="citation" title="Claude Code Hooks Reference"><span class="highlight--cyan">Claude Code hooks</span></a> are shell commands that run at lifecycle events. They don't implement Brooks' layers. They provide integration points where <em>you</em> can implement them. Your verification code runs at defined points:</p>
         <ul class="list">
           <li><strong>PreToolUse:</strong> Before any tool executes. <em>You</em> enforce Layer 0-2 here. Can modify inputs via <code class="inline-code">additionalContext</code>.</li>
           <li><strong>PostToolUse:</strong> After execution. Run linters, formatters, tests.</li>
@@ -424,8 +420,7 @@
         <h3>Policy languages</h3>
         <p>Hooks tell you <em>when</em> to check. But what rules do you check?</p>
         <p><a href="https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-understanding-cedar.html" class="citation" title="Cedar Policy Language for AWS AgentCore"><span class="highlight--cyan">Cedar</span></a> and <a href="https://arxiv.org/abs/2503.18666" class="citation" title="AgentSpec: Customizable Runtime Guardrails, ICSE 2026"><span class="highlight--cyan">AgentSpec</span></a> are current attempts. Cedar is AWS's production implementation—declarative permit/deny rules evaluated at a gateway. AgentSpec is academic—a DSL with 90% prevention rate in research evaluations.</p>
-        <p><strong>What they get right:</strong> Rules in deterministic code can't be argued with. The agent never sees tools it isn't permitted to use.</p>
-        <p><strong>Where they overcomplicate:</strong> Most teams don't need a new language. A TypeScript function validating against a rule set achieves the same thing:</p>
+        <p>Rules in deterministic code can't be argued with. The agent never sees tools it isn't permitted to use. But most teams don't need a new language. A TypeScript function validating against a rule set works fine:</p>
 
         <div class="code-block" data-title="policy.ts">
           <pre><code><span class="line"><span class="cmt">// You probably don't need Cedar. This works.</span></span>
@@ -440,7 +435,7 @@
 <span class="line">}</span></code></pre>
         </div>
 
-        <p>Cedar's value is governance at scale—many agents, auditable policies, compliance requirements. For one agent, you probably don't need it.</p>
+        <p>Cedar's value is governance at scale: many agents, auditable policies, compliance requirements. For one agent, you probably don't need it.</p>
       </div>
     </section>
 
@@ -590,8 +585,7 @@
 
         <h3>The box</h3>
         <p><a href="https://brooker.co.za/blog/2026/01/12/agent-box.html" class="citation" title="Agent Safety is a Box"><span class="highlight--cyan">Marc Brooker</span></a> names the pattern: a deterministic control layer <em>outside</em> the agent. All tool calls flow through a gateway. The gateway checks policy before execution.</p>
-        <p><strong>What it gets right:</strong> If your agent can be convinced to ignore system prompt constraints, you have a problem. If your gateway refuses unauthorized tools regardless of what the agent says, you have a solution. The agent can't reason its way past code.</p>
-        <p><strong>What's worth noting:</strong> If you're already routing tool calls through validation (which you should be after reading this section), you already have the box. Brooker's contribution is the clear mental model and the argument for why prompt-based safety is insufficient.</p>
+        <p>If your agent can be convinced to ignore system prompt constraints, you have a problem. If your gateway refuses unauthorized tools regardless of what the agent says, you have a solution. The agent can't reason its way past code. If you're already validating tool calls (which you should), you have this pattern. Brooker's insight is the mental model: prompt-based safety alone isn't enough.</p>
 
         <h3>New attack surfaces</h3>
         <p><a href="https://arxiv.org/html/2601.10338" class="citation" title="Skills Security Research"><span class="highlight--cyan">Skills</span></a> and <a href="https://simonwillison.net/2025/Jun/13/prompt-injection-design-patterns/" class="citation" title="Prompt Injection Design Patterns">MCP</a> add new risks:</p>
@@ -678,8 +672,7 @@
 
         <h3>LLM-as-judge</h3>
         <p>When you can't write deterministic assertions, use another model to evaluate. <a href="https://arxiv.org/abs/2405.01535" class="citation" title="Prometheus 2: Open Source LLM Judges"><span class="highlight--cyan">Prometheus 2</span></a> achieves near-human agreement on code quality judgments.</p>
-        <p><strong>What it gets right:</strong> Scales evaluation beyond what humans can review. Catches subtle issues that pattern matching misses.</p>
-        <p><strong>What's worth noting:</strong> Judge models have their own biases and blind spots. Calibrate against human judgments first. Use judges for screening, not final verdicts.</p>
+        <p>LLM judges scale evaluation beyond what humans can review and catch subtle issues that pattern matching misses. But they have their own biases. Calibrate against human judgments first. Use judges for screening, not final verdicts.</p>
 
         <h3>Variance matters</h3>
         <p>A 70% success rate with 5% variance is more useful than 85% success with 30% variance. Report confidence intervals. Track variance over time. A change that increases mean performance but also increases variance may not be an improvement.</p>
@@ -812,8 +805,7 @@
         <h3>Context poisoning</h3>
         <p>When workers share context, hallucinations propagate. Worker A hallucinates a fact. Worker B references it. Worker C cites B as confirmation. The false information looks well-sourced because it has multiple "references."</p>
         <p>Context isolation (above) is the defense. Each worker starts clean. Results go through the coordinator, which can verify before incorporating.</p>
-        <p><strong>What this gets right:</strong> Isolation treats each worker as untrusted input to the coordinator. The coordinator can validate claims, check sources, reject contradictions.</p>
-        <p><strong>What's worth noting:</strong> Full isolation isn't always practical. When workers need to share state (e.g., a codebase), bound what they can modify. Prefer immutable shared resources plus explicit handoffs for mutations.</p>
+        <p>Isolation treats each worker as untrusted input. The coordinator validates claims, checks sources, rejects contradictions. Full isolation isn't always practical. When workers share state (a codebase, for example), bound what each can modify. Prefer immutable shared resources plus explicit handoffs for changes.</p>
 
         <h3>What the coordinator keeps</h3>
         <p>The coordinator maintains minimal state across worker calls:</p>
