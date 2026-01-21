@@ -20,7 +20,7 @@
  * @see https://github.com/bbopen/essence-of-llm-agents
  */
 
-import type { Action, Policy, Budget, GuardResult } from './types';
+import type { Action, Policy, Budget, GuardResult } from './types.js';
 
 /**
  * Guard: Validate action structure

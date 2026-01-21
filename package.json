@@ -1,0 +1,25 @@
+{
+  "name": "essence-of-llm-agents",
+  "version": "1.0.0",
+  "description": "The Essence of LLM Agentic Systems - Pattern Reference with Educational Example",
+  "type": "module",
+  "scripts": {
+    "example": "tsx example/index.ts",
+    "example:mock": "USE_MOCK=true tsx example/index.ts",
+    "example:mock:compare": "USE_MOCK=true MOCK_SCENARIO=comparison tsx example/index.ts",
+    "example:coordinator": "tsx example/index-coordinator.ts",
+    "example:coordinator:mock": "USE_MOCK=true tsx example/index-coordinator.ts",
+    "test": "USE_MOCK=true tsx example/evaluation/runner.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "openai": "^4.77.0",
+    "dotenv": "^16.4.7",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
