@@ -1,6 +1,7 @@
 # Development artifacts
 screenshots/
 scripts/
+/docs/
 
 # Build output
 dist/

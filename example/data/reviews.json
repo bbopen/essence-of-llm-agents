@@ -1,0 +1,360 @@
+{
+  "reviews": {
+    "laptop-001": [
+      {
+        "id": "rev-001-1",
+        "rating": 5,
+        "title": "Best keyboard for developers",
+        "body": "I've been using ThinkPads for 15 years and the X1 Carbon continues the tradition. The keyboard is exceptional - after 8 hours of coding, my hands don't hurt. The OLED screen is gorgeous for late-night work. Only downside is the price, but you get what you pay for.",
+        "verified": true,
+        "helpful": 89,
+        "date": "2024-11-15",
+        "author": "DevJohn_92"
+      },
+      {
+        "id": "rev-001-2",
+        "rating": 4,
+        "title": "Great but runs warm",
+        "body": "Excellent build quality and performance. The display is stunning. However, when compiling large projects, the fan kicks in and the bottom gets quite warm. Not a dealbreaker, but worth mentioning.",
+        "verified": true,
+        "helpful": 45,
+        "date": "2024-10-22",
+        "author": "CodeMonkey"
+      },
+      {
+        "id": "rev-001-3",
+        "rating": 3,
+        "title": "Good laptop, overpriced",
+        "body": "It's a good machine but you can get similar specs from Dell or ASUS for $400 less. The keyboard IS better though, I'll give it that. If you type a lot, maybe worth it.",
+        "verified": false,
+        "helpful": 67,
+        "date": "2024-09-18",
+        "author": "BudgetBuyer"
+      }
+    ],
+    "laptop-003": [
+      {
+        "id": "rev-003-1",
+        "rating": 5,
+        "title": "Perfect for iOS development",
+        "body": "Upgraded from Intel MacBook Pro. The M3 is insanely fast for Xcode builds. 16GB is the sweet spot for development. Battery lasts all day - I regularly get 14+ hours. Silent operation is a huge plus during meetings.",
+        "verified": true,
+        "helpful": 156,
+        "date": "2024-11-20",
+        "author": "SwiftDev"
+      },
+      {
+        "id": "rev-003-2",
+        "rating": 5,
+        "title": "Best laptop I've ever owned",
+        "body": "Coming from Windows, this is a revelation. Everything just works. The trackpad is incredible. Performance for web development is more than enough. Only complaint: wish it had more ports.",
+        "verified": true,
+        "helpful": 78,
+        "date": "2024-10-15",
+        "author": "WebDevSarah"
+      },
+      {
+        "id": "rev-003-3",
+        "rating": 4,
+        "title": "Great but limited expansion",
+        "body": "Love the machine but 16GB soldered RAM means no upgrades. For $1299 I wish there was at least an option for 24GB. Performance is fantastic though.",
+        "verified": true,
+        "helpful": 92,
+        "date": "2024-09-28",
+        "author": "RAMHungry"
+      }
+    ],
+    "laptop-004": [
+      {
+        "id": "rev-004-1",
+        "rating": 5,
+        "title": "OLED + Performance combo",
+        "body": "The OLED display is absolutely stunning for coding - true blacks make syntax highlighting pop. The H-series i7 handles everything I throw at it. Runs Docker, VS Code, Chrome with 50 tabs, no problem.",
+        "verified": true,
+        "helpful": 67,
+        "date": "2024-11-10",
+        "author": "FullStackDave"
+      },
+      {
+        "id": "rev-004-2",
+        "rating": 3,
+        "title": "Great display, mediocre battery",
+        "body": "Display is gorgeous but battery life is disappointing - maybe 5-6 hours with coding work. Also heavier than expected. Performance is good but not as portable as I hoped.",
+        "verified": false,
+        "helpful": 89,
+        "date": "2024-10-05",
+        "author": "RoadWarrior"
+      },
+      {
+        "id": "rev-004-3",
+        "rating": 4,
+        "title": "Solid workstation replacement",
+        "body": "Using this as my primary dev machine. Compiles are fast, the large screen is great for having multiple windows. Build quality is excellent. Just wish Dell's software wasn't so bloated out of the box.",
+        "verified": true,
+        "helpful": 34,
+        "date": "2024-09-12",
+        "author": "DevOpsDoug"
+      }
+    ],
+    "laptop-005": [
+      {
+        "id": "rev-005-1",
+        "rating": 5,
+        "title": "Finally, a repairable laptop!",
+        "body": "As a developer who cares about sustainability, this is perfect. Already upgraded the RAM myself. The modular ports are genius - I have USB-C on one side, USB-A and HDMI on the other. Linux support is flawless.",
+        "verified": true,
+        "helpful": 234,
+        "date": "2024-11-18",
+        "author": "LinuxLover"
+      },
+      {
+        "id": "rev-005-2",
+        "rating": 4,
+        "title": "Great concept, decent execution",
+        "body": "Love the philosophy and repairability. Performance is good. However, build quality isn't quite ThinkPad level and the screen could be brighter. Still, I'm happy to support Framework.",
+        "verified": true,
+        "helpful": 123,
+        "date": "2024-10-08",
+        "author": "RightToRepair"
+      },
+      {
+        "id": "rev-005-3",
+        "rating": 4,
+        "title": "Perfect Linux development machine",
+        "body": "Runs Fedora perfectly out of the box. All hardware detected, no driver issues. The AMD CPU has great Linux support. Battery life around 8 hours with normal coding work.",
+        "verified": true,
+        "helpful": 89,
+        "date": "2024-09-25",
+        "author": "FedoraDev"
+      }
+    ],
+    "laptop-007": [
+      {
+        "id": "rev-007-1",
+        "rating": 4,
+        "title": "Great value for students",
+        "body": "Bought this for my CS degree. It handles VS Code, IntelliJ, and even some light Docker work fine. The 16GB RAM makes a big difference. Not the prettiest laptop but gets the job done.",
+        "verified": true,
+        "helpful": 156,
+        "date": "2024-11-05",
+        "author": "CSStudent2024"
+      },
+      {
+        "id": "rev-007-2",
+        "rating": 4,
+        "title": "Solid budget option",
+        "body": "For under $700, this is impressive. The screen is decent (not great), keyboard is comfortable enough. Performance handles web development fine. Battery is mediocre though - about 5 hours.",
+        "verified": true,
+        "helpful": 78,
+        "date": "2024-10-20",
+        "author": "BudgetCoder"
+      },
+      {
+        "id": "rev-007-3",
+        "rating": 3,
+        "title": "Okay for the price",
+        "body": "It works but feels cheap. Keyboard is mushy, trackpad is just okay. Screen washes out in bright light. If you can stretch to $800, look at the Acer Swift instead.",
+        "verified": false,
+        "helpful": 45,
+        "date": "2024-09-15",
+        "author": "HonestReviewer"
+      }
+    ],
+    "laptop-008": [
+      {
+        "id": "rev-008-1",
+        "rating": 5,
+        "title": "Best budget laptop for coding",
+        "body": "Incredible value. The Ryzen 5 is surprisingly capable, 16GB RAM is perfect, and the build quality punches above its weight. I use this for Python/Django development daily. Highly recommend.",
+        "verified": true,
+        "helpful": 198,
+        "date": "2024-11-12",
+        "author": "PythonPete"
+      },
+      {
+        "id": "rev-008-2",
+        "rating": 4,
+        "title": "Solid daily driver",
+        "body": "Using this for Node.js development. Works great with VS Code and Docker. The 16:10 screen ratio is nice for coding. Only downside is the plastic build feels a bit flimsy.",
+        "verified": true,
+        "helpful": 67,
+        "date": "2024-10-02",
+        "author": "NodeNinja"
+      }
+    ],
+    "laptop-009": [
+      {
+        "id": "rev-009-1",
+        "rating": 5,
+        "title": "OLED at this price is amazing",
+        "body": "Can't believe you get an OLED screen under $800. It's gorgeous for everything - coding, movies, photo editing. Performance is solid for development work. Battery is decent at around 8 hours.",
+        "verified": true,
+        "helpful": 145,
+        "date": "2024-11-08",
+        "author": "OLEDFan"
+      },
+      {
+        "id": "rev-009-2",
+        "rating": 4,
+        "title": "Great screen, okay everything else",
+        "body": "The OLED display is the star here. The rest is fine but not exceptional. Keyboard is decent, trackpad is okay, speakers are mediocre. But for a coding machine focused on display quality, it's great.",
+        "verified": false,
+        "helpful": 78,
+        "date": "2024-09-22",
+        "author": "ScreenSnob"
+      }
+    ],
+    "laptop-010": [
+      {
+        "id": "rev-010-1",
+        "rating": 5,
+        "title": "Worth every penny for professionals",
+        "body": "The M3 Pro is a beast. I work with large codebases and this handles compilation faster than my old 16-inch Intel. The speakers are incredible. Best laptop I've ever used for development.",
+        "verified": true,
+        "helpful": 267,
+        "date": "2024-11-22",
+        "author": "SeniorDev"
+      },
+      {
+        "id": "rev-010-2",
+        "rating": 5,
+        "title": "Finally, a MacBook worth the upgrade",
+        "body": "Coming from M1 MacBook Air, this is a significant step up. The extra ports are welcome, the display is stunning, and the performance headroom is noticeable with Xcode and simulators.",
+        "verified": true,
+        "helpful": 189,
+        "date": "2024-10-30",
+        "author": "iOSDeveloper"
+      },
+      {
+        "id": "rev-010-3",
+        "rating": 4,
+        "title": "Great but heavy",
+        "body": "Performance is fantastic but this thing is heavier than I expected. Coming from an Air, it's noticeable in my bag. If you travel a lot, consider that. Otherwise, it's excellent.",
+        "verified": true,
+        "helpful": 98,
+        "date": "2024-09-18",
+        "author": "NomadCoder"
+      }
+    ],
+    "laptop-014": [
+      {
+        "id": "rev-014-1",
+        "rating": 5,
+        "title": "Best value OLED laptop",
+        "body": "At $849, this is a steal. The OLED screen is gorgeous, performance is great for development, and the build quality is solid. Thunderbolt 4 ports are a nice bonus. Highly recommended.",
+        "verified": true,
+        "helpful": 178,
+        "date": "2024-11-15",
+        "author": "ValueHunter"
+      },
+      {
+        "id": "rev-014-2",
+        "rating": 4,
+        "title": "Great laptop with minor quirks",
+        "body": "Love the screen and performance. Two small issues: the keyboard deck can get warm, and the webcam is just okay. But for coding and general use, it's excellent at this price.",
+        "verified": false,
+        "helpful": 89,
+        "date": "2024-10-10",
+        "author": "TechReviewer"
+      }
+    ],
+    "laptop-018": [
+      {
+        "id": "rev-018-1",
+        "rating": 5,
+        "title": "Linux developer's dream",
+        "body": "Pop!_OS comes pre-installed and everything works perfectly. The company actually supports open source. Battery life is exceptional - 10+ hours easily. Worth supporting a company that shares our values.",
+        "verified": true,
+        "helpful": 234,
+        "date": "2024-11-20",
+        "author": "OpenSourceDev"
+      },
+      {
+        "id": "rev-018-2",
+        "rating": 4,
+        "title": "Great Linux laptop, premium price",
+        "body": "It's essentially a rebranded Clevo, but the Linux support and customer service make it worth it. The firmware updates through the OS are convenient. Could be lighter though.",
+        "verified": true,
+        "helpful": 156,
+        "date": "2024-10-05",
+        "author": "LinuxEngineer"
+      }
+    ],
+    "laptop-019": [
+      {
+        "id": "rev-019-1",
+        "rating": 5,
+        "title": "Enterprise quality, 32GB heaven",
+        "body": "Finally, a business laptop with 32GB RAM. Running multiple VMs for testing is smooth. Build quality is excellent, keyboard is good (not ThinkPad level but close). Privacy screen is useful.",
+        "verified": true,
+        "helpful": 145,
+        "date": "2024-11-18",
+        "author": "EnterpriseDev"
+      },
+      {
+        "id": "rev-019-2",
+        "rating": 4,
+        "title": "Solid business laptop",
+        "body": "Does everything well. 32GB RAM handles my development workflow easily. Only complaint is it's a bit boring looking, but I guess that's expected for enterprise hardware.",
+        "verified": true,
+        "helpful": 67,
+        "date": "2024-09-30",
+        "author": "CorporateCoder"
+      }
+    ],
+    "laptop-024": [
+      {
+        "id": "rev-024-1",
+        "rating": 5,
+        "title": "OLED under $700 - incredible",
+        "body": "This is insane value. The OLED screen is better than laptops twice the price. 16GB RAM and a 12-core CPU for $700? Great for web development and light creative work.",
+        "verified": true,
+        "helpful": 289,
+        "date": "2024-11-10",
+        "author": "BargainHunter"
+      },
+      {
+        "id": "rev-024-2",
+        "rating": 4,
+        "title": "Best budget option for students",
+        "body": "Bought this for computer science. The OLED is beautiful for long coding sessions. Performance handles everything I need. Build could be sturdier but can't complain at this price.",
+        "verified": true,
+        "helpful": 167,
+        "date": "2024-10-15",
+        "author": "CSFreshman"
+      },
+      {
+        "id": "rev-024-3",
+        "rating": 4,
+        "title": "Solid value but battery is meh",
+        "body": "Great screen, good performance, decent build. Battery life is around 6 hours though - the OLED is power hungry. Keep a charger handy. Otherwise, excellent for the price.",
+        "verified": false,
+        "helpful": 78,
+        "date": "2024-09-08",
+        "author": "RealistReviewer"
+      }
+    ],
+    "laptop-028": [
+      {
+        "id": "rev-028-1",
+        "rating": 5,
+        "title": "Ultimate Linux development machine",
+        "body": "32GB RAM, OLED screen, massive battery, and perfect Linux support. This is everything I wanted. Tuxedo's control center makes managing power profiles easy. Worth the price.",
+        "verified": true,
+        "helpful": 123,
+        "date": "2024-11-05",
+        "author": "ArchLinuxUser"
+      },
+      {
+        "id": "rev-028-2",
+        "rating": 4,
+        "title": "Great specs, limited availability",
+        "body": "Amazing machine for Linux development. The 99Wh battery lasts forever. Only downside is shipping to the US takes forever and service might be tricky. But for the hardware, worth it.",
+        "verified": false,
+        "helpful": 67,
+        "date": "2024-09-20",
+        "author": "GermanEngineering"
+      }
+    ]
+  }
+}
