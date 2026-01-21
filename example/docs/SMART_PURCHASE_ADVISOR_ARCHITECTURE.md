@@ -127,10 +127,10 @@ This example demonstrates the **coordinator-worker pattern** with full security,
 │  │  Product Catalog (data/products.json)                       │   │
 │  │  • 30 laptops with specs, prices, ratings                   │   │
 │  │  • Some with missing data (tests error handling)            │   │
-│  │  • Price range: $400 - $3,500                               │   │
+│  │  • Price range: $449 - $2,499                               │   │
 │  │                                                             │   │
 │  │  Reviews Database (data/reviews.json)                       │   │
-│  │  • 3-5 reviews per product                                  │   │
+│  │  • 2-5 reviews per product                                  │   │
 │  │  • Mix of positive, negative, detailed, brief               │   │
 │  │  • Some contradictory (tests verification)                  │   │
 │  │                                                             │   │
@@ -425,7 +425,7 @@ async function runEvaluation(
 ```
 
 **Design considerations:**
-- Range from budget ($400) to premium ($3,500)
+- Range from budget ($449) to premium ($2,499)
 - Mix of brands, specs, use cases
 - Some products have missing fields (tests validation)
 - Some have identical specs but different prices (tests comparison)
@@ -461,7 +461,8 @@ async function runEvaluation(
 ```
 
 **Design considerations:**
-- 3-5 reviews per product
+
+- 2-5 reviews per product
 - Mix of verified/unverified
 - Some contradictory opinions (tests synthesis)
 - Varying detail levels
@@ -528,7 +529,7 @@ User: "Find me a laptop under $1500 for programming"
 │                                                                     │
 │    ┌─────────────────────────────────────────────────────────────┐ │
 │    │ Spec Worker Loop:                                           │ │
-│    │   → search_products({query: "laptop programming", max: 1500})│
+│    │   → search_products({query: "laptop programming", maxPrice: 1500})│
 │    │   ← [5 products match]                                      │ │
 │    │   → compare_specs({ids: ["001", "002", "003", "004", "005"]})│
 │    │   ← [comparison table]                                      │ │

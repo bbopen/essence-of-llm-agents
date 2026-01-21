@@ -26,7 +26,7 @@
         "rating": 3,
         "title": "Good laptop, overpriced",
         "body": "It's a good machine but you can get similar specs from Dell or ASUS for $400 less. The keyboard IS better though, I'll give it that. If you type a lot, maybe worth it.",
-        "verified": true,
+        "verified": false,
         "helpful": 67,
         "date": "2024-09-18",
         "author": "BudgetBuyer"
@@ -80,7 +80,7 @@
         "rating": 3,
         "title": "Great display, mediocre battery",
         "body": "Display is gorgeous but battery life is disappointing - maybe 5-6 hours with coding work. Also heavier than expected. Performance is good but not as portable as I hoped.",
-        "verified": true,
+        "verified": false,
         "helpful": 89,
         "date": "2024-10-05",
         "author": "RoadWarrior"
@@ -154,7 +154,7 @@
         "rating": 3,
         "title": "Okay for the price",
         "body": "It works but feels cheap. Keyboard is mushy, trackpad is just okay. Screen washes out in bright light. If you can stretch to $800, look at the Acer Swift instead.",
-        "verified": true,
+        "verified": false,
         "helpful": 45,
         "date": "2024-09-15",
         "author": "HonestReviewer"
@@ -198,7 +198,7 @@
         "rating": 4,
         "title": "Great screen, okay everything else",
         "body": "The OLED display is the star here. The rest is fine but not exceptional. Keyboard is decent, trackpad is okay, speakers are mediocre. But for a coding machine focused on display quality, it's great.",
-        "verified": true,
+        "verified": false,
         "helpful": 78,
         "date": "2024-09-22",
         "author": "ScreenSnob"
@@ -252,7 +252,7 @@
         "rating": 4,
         "title": "Great laptop with minor quirks",
         "body": "Love the screen and performance. Two small issues: the keyboard deck can get warm, and the webcam is just okay. But for coding and general use, it's excellent at this price.",
-        "verified": true,
+        "verified": false,
         "helpful": 89,
         "date": "2024-10-10",
         "author": "TechReviewer"
@@ -328,7 +328,7 @@
         "rating": 4,
         "title": "Solid value but battery is meh",
         "body": "Great screen, good performance, decent build. Battery life is around 6 hours though - the OLED is power hungry. Keep a charger handy. Otherwise, excellent for the price.",
-        "verified": true,
+        "verified": false,
         "helpful": 78,
         "date": "2024-09-08",
         "author": "RealistReviewer"
@@ -350,7 +350,7 @@
         "rating": 4,
         "title": "Great specs, limited availability",
         "body": "Amazing machine for Linux development. The 99Wh battery lasts forever. Only downside is shipping to the US takes forever and service might be tricky. But for the hardware, worth it.",
-        "verified": true,
+        "verified": false,
         "helpful": 67,
         "date": "2024-09-20",
         "author": "GermanEngineering"
