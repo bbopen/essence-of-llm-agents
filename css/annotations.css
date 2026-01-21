@@ -1,0 +1,653 @@
+/**
+ * Code Annotations - Scholarly Marginalia System
+ *
+ * Inspired by Norton Critical Editions and Tufte's marginal notes.
+ * Refined typography, generous spacing, elegant transitions.
+ */
+
+/* =============================================================================
+   Design Tokens for Annotations
+   ============================================================================= */
+
+.annotated-code {
+  --annotation-accent: var(--rubin-clay);
+  --annotation-accent-soft: rgba(217, 119, 87, 0.06);
+  --annotation-accent-medium: rgba(217, 119, 87, 0.12);
+  --annotation-border: rgba(135, 134, 127, 0.12);
+  --annotation-text: var(--color-text);
+  --annotation-text-muted: var(--color-text-muted);
+  --margin-width: 520px;
+  --code-bg: #2a2826;
+}
+
+/* =============================================================================
+   Atmosphere & Texture
+   ============================================================================= */
+
+/* Subtle paper grain texture overlay for scholarly feel */
+.annotated-code::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.012;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: multiply;
+}
+
+/* =============================================================================
+   Annotated Code Block Container
+   ============================================================================= */
+
+.annotated-code {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(500px, 700px) 1fr;
+  gap: var(--spacing-lg);
+  align-items: start;
+  flex: 1;
+  max-width: none;
+}
+
+/* When annotation block is inside content-grid, span full width */
+.content-grid .annotated-code {
+  max-width: 100%;
+}
+
+/* Section layout with annotated code - side by side */
+.section--annotated {
+  justify-content: flex-start;
+  padding-top: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.section--annotated .content-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 420px) 1fr;
+  gap: var(--spacing-lg);
+  align-items: start;
+  max-width: 1600px;
+}
+
+.section--annotated .content-text {
+  max-width: none;
+  position: sticky;
+  top: var(--spacing-md);
+}
+
+.section--annotated .annotated-code {
+  max-width: none;
+}
+
+/* =============================================================================
+   Code Source Block
+   ============================================================================= */
+
+.annotated-code__source {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--code-bg);
+  box-shadow:
+    0 8px 32px -8px rgba(31, 30, 29, 0.25),
+    0 2px 8px rgba(31, 30, 29, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* Subtle top edge highlight for depth */
+.annotated-code__source::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 20%,
+    rgba(255, 255, 255, 0.08) 80%,
+    transparent 100%);
+  z-index: 1;
+}
+
+.annotated-code__source pre {
+  margin: 0;
+  counter-reset: line;
+  padding: var(--spacing-md) 0;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  background: transparent;
+}
+
+.annotated-code__source code {
+  background: transparent;
+  color: #e8e6e3;
+}
+
+/* =============================================================================
+   Line Styling with Enhanced Contrast
+   ============================================================================= */
+
+.annotated-code__line {
+  display: block;
+  position: relative;
+  padding-left: 3.5em;
+  padding-right: var(--spacing-md);
+  min-height: 1.5em;
+  line-height: 1.7;
+  transition: background-color 0.25s ease;
+}
+
+.annotated-code__line::before {
+  content: counter(line);
+  counter-increment: line;
+  position: absolute;
+  left: 0;
+  width: 2.8em;
+  text-align: right;
+  color: #6b6965;
+  font-size: 0.75em;
+  line-height: 2.25;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  letter-spacing: -0.02em;
+}
+
+/* Line highlighting when annotation is focused */
+.annotated-code__line--highlighted {
+  background: linear-gradient(90deg,
+    rgba(217, 119, 87, 0.2) 0%,
+    rgba(217, 119, 87, 0.08) 100%);
+  margin-left: -0.5em;
+  margin-right: -0.5em;
+  padding-left: 4em;
+  padding-right: calc(var(--spacing-md) + 0.5em);
+  border-radius: 3px;
+  position: relative;
+}
+
+/* Accent bar on highlighted lines */
+.annotated-code__line--highlighted::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  width: 3px;
+  background: var(--annotation-accent);
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px rgba(217, 119, 87, 0.3);
+}
+
+/* =============================================================================
+   Syntax Highlighting with Strong Contrast
+   ============================================================================= */
+
+.annotated-code .token-keyword {
+  color: #ff9b71;
+  font-weight: 500;
+}
+
+.annotated-code .token-string {
+  color: #ffd866;
+}
+
+.annotated-code .token-comment {
+  color: #8a8680;
+  font-style: italic;
+}
+
+.annotated-code .token-function {
+  color: #78dce8;
+}
+
+.annotated-code .token-type {
+  color: #ab9df2;
+}
+
+/* =============================================================================
+   Annotation Markers (Inline Superscripts)
+   ============================================================================= */
+
+.annotation-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4em;
+  height: 1.4em;
+  margin-left: 0.5em;
+  font-family: var(--font-family-base);
+  font-size: 0.55em;
+  font-weight: 600;
+  color: #ffd866;
+  background: rgba(255, 216, 102, 0.15);
+  border: 1.5px solid rgba(255, 216, 102, 0.4);
+  border-radius: 50%;
+  cursor: pointer;
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.2s ease;
+  vertical-align: super;
+  position: relative;
+  top: -0.15em;
+  font-variant-numeric: tabular-nums;
+}
+
+.annotation-marker:hover {
+  background: rgba(255, 216, 102, 0.25);
+  border-color: rgba(255, 216, 102, 0.7);
+  transform: scale(1.2);
+  box-shadow: 0 0 12px rgba(255, 216, 102, 0.3);
+}
+
+.annotation-marker--active {
+  background: #ffd866;
+  color: var(--code-bg);
+  border-color: #ffd866;
+  transform: scale(1.15);
+  box-shadow:
+    0 2px 12px rgba(255, 216, 102, 0.5),
+    0 0 0 4px rgba(255, 216, 102, 0.15);
+}
+
+.annotation-marker:focus {
+  outline: 2px solid var(--rubin-cyan);
+  outline-offset: 2px;
+}
+
+/* =============================================================================
+   Margin Notes Panel - Elegant & Spacious
+   ============================================================================= */
+
+.annotated-code__margin {
+  position: sticky;
+  top: var(--spacing-lg);
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-left: var(--spacing-sm);
+  padding-right: 0;
+  border-left: 1px solid var(--annotation-border);
+  scrollbar-width: thin;
+  scrollbar-color: var(--annotation-border) transparent;
+}
+
+.annotated-code__margin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.annotated-code__margin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.annotated-code__margin::-webkit-scrollbar-thumb {
+  background: var(--annotation-border);
+  border-radius: 2px;
+}
+
+/* Decorative flourish at top of margin */
+.annotated-code__margin::before {
+  content: '§';
+  display: block;
+  font-family: var(--font-family-base);
+  font-size: 1.25rem;
+  color: rgba(135, 134, 127, 0.2);
+  text-align: center;
+  margin-bottom: var(--spacing-md);
+  letter-spacing: 0.15em;
+}
+
+/* =============================================================================
+   Individual Annotation Notes - Refined Typography
+   ============================================================================= */
+
+.annotation-note {
+  position: relative;
+  padding: var(--spacing-sm) var(--spacing-xs);
+  padding-left: var(--spacing-sm);
+  border-left: 2px solid transparent;
+  margin-bottom: var(--spacing-sm);
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+  border-radius: 0 6px 6px 0;
+}
+
+/* Staggered entrance animation */
+@keyframes note-entrance {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.annotation-note:nth-child(1) { animation: note-entrance 0.5s ease-out 0.05s both; }
+.annotation-note:nth-child(2) { animation: note-entrance 0.5s ease-out 0.1s both; }
+.annotation-note:nth-child(3) { animation: note-entrance 0.5s ease-out 0.15s both; }
+.annotation-note:nth-child(4) { animation: note-entrance 0.5s ease-out 0.2s both; }
+.annotation-note:nth-child(5) { animation: note-entrance 0.5s ease-out 0.25s both; }
+.annotation-note:nth-child(6) { animation: note-entrance 0.5s ease-out 0.3s both; }
+.annotation-note:nth-child(7) { animation: note-entrance 0.5s ease-out 0.35s both; }
+.annotation-note:nth-child(8) { animation: note-entrance 0.5s ease-out 0.4s both; }
+
+.annotation-note:hover {
+  background: var(--annotation-accent-soft);
+  border-left-color: rgba(217, 119, 87, 0.3);
+}
+
+.annotation-note--active {
+  background: var(--annotation-accent-soft);
+  border-left-color: var(--annotation-accent);
+  padding-left: var(--spacing-md);
+}
+
+/* =============================================================================
+   Annotation Header & Number
+   ============================================================================= */
+
+.annotation-note__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+  width: 100%;
+}
+
+.annotation-note__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5em;
+  height: 1.5em;
+  font-family: var(--font-family-base);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--annotation-accent);
+  background: transparent;
+  border: 1.5px solid rgba(217, 119, 87, 0.4);
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  font-variant-numeric: tabular-nums;
+}
+
+.annotation-note--active .annotation-note__number {
+  background: var(--annotation-accent);
+  color: var(--background-color);
+  border-color: var(--annotation-accent);
+  box-shadow: 0 2px 8px rgba(217, 119, 87, 0.3);
+}
+
+/* =============================================================================
+   Annotation Title - Editorial Typography
+   ============================================================================= */
+
+.annotation-note__title {
+  font-family: var(--font-family-base);
+  font-size: 0.95rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--annotation-text);
+  line-height: 1.5;
+  flex: 1;
+  letter-spacing: 0.01em;
+}
+
+.annotation-note__title::first-letter {
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* =============================================================================
+   Annotation Body - Expanded Content with Elegance
+   ============================================================================= */
+
+.annotation-note__body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 0;
+  opacity: 0;
+  width: 100%;
+}
+
+.annotation-note--expanded .annotation-note__body {
+  grid-template-rows: 1fr;
+  margin-top: var(--spacing-md);
+  opacity: 1;
+  transition:
+    grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.35s ease 0.1s;
+}
+
+.annotation-note__content {
+  overflow: hidden;
+  font-family: var(--font-family-base);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--annotation-text-muted);
+  padding-left: 0;
+  padding-top: var(--spacing-xs);
+  padding-bottom: var(--spacing-xs);
+  padding-right: 0;
+  letter-spacing: 0.005em;
+}
+
+/* Expanded content styling - minimal padding for maximum text width */
+.annotation-note--expanded .annotation-note__content {
+  position: relative;
+  border-left: none;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.annotation-note__content p {
+  margin: 0 0 0.75em 0;
+}
+
+.annotation-note__content p:last-child {
+  margin-bottom: 0;
+}
+
+.annotation-note__content code {
+  font-size: 0.85em;
+  background: rgba(31, 30, 29, 0.06);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: var(--font-family-code);
+  color: var(--annotation-accent);
+}
+
+/* =============================================================================
+   Expand Indicator
+   ============================================================================= */
+
+.annotation-note__expand {
+  font-size: 0.75rem;
+  color: var(--rubin-gray);
+  margin-top: var(--spacing-xs);
+  margin-left: calc(1.5em + var(--spacing-xs));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+.annotation-note:hover .annotation-note__expand,
+.annotation-note--active .annotation-note__expand {
+  opacity: 0.5;
+}
+
+.annotation-note--expanded .annotation-note__expand {
+  display: none;
+}
+
+/* =============================================================================
+   Keyboard Hints
+   ============================================================================= */
+
+.annotation-hints {
+  position: fixed;
+  bottom: var(--spacing-md);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 50;
+  background: rgba(250, 249, 245, 0.97);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: 6px;
+  box-shadow:
+    0 4px 20px rgba(31, 30, 29, 0.1),
+    0 1px 3px rgba(31, 30, 29, 0.05);
+  backdrop-filter: blur(8px);
+}
+
+.annotated-code:focus-within ~ .annotation-hints,
+.annotation-hints--visible {
+  opacity: 1;
+}
+
+.annotation-hints kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-family: var(--font-family-code);
+  font-size: 0.85em;
+  background: rgba(31, 30, 29, 0.06);
+  border: 1px solid rgba(31, 30, 29, 0.1);
+  border-radius: 3px;
+  margin: 0 2px;
+  box-shadow: 0 1px 0 rgba(31, 30, 29, 0.05);
+}
+
+/* =============================================================================
+   Visual Connector from Margin to Code
+   ============================================================================= */
+
+.annotation-note--active::after {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--spacing-lg));
+  top: 50%;
+  width: var(--spacing-md);
+  height: 1px;
+  background: linear-gradient(90deg,
+    var(--annotation-accent) 0%,
+    transparent 100%);
+  opacity: 0.5;
+  transform: translateY(-50%);
+}
+
+/* =============================================================================
+   Responsive Adjustments
+   ============================================================================= */
+
+@media (max-width: 1600px) {
+  .annotated-code {
+    --margin-width: 450px;
+    gap: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 1400px) {
+  .annotated-code {
+    --margin-width: 380px;
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 1100px) {
+  .annotated-code {
+    --margin-width: 320px;
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 900px) {
+  .annotated-code {
+    grid-template-columns: 1fr;
+  }
+
+  .annotated-code__margin {
+    position: static;
+    max-height: none;
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid var(--annotation-border);
+  }
+
+  .annotated-code__margin::before {
+    display: none;
+  }
+
+  .annotation-note {
+    display: block;
+    padding: var(--spacing-sm);
+    border-left: none;
+    border-radius: 4px;
+    background: var(--annotation-accent-soft);
+  }
+
+  .annotation-note--active::after {
+    display: none;
+  }
+}
+
+/* =============================================================================
+   Focus States for Accessibility
+   ============================================================================= */
+
+.annotation-note:focus {
+  outline: none;
+}
+
+.annotation-note:focus-visible {
+  outline: 2px solid var(--rubin-cyan);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* =============================================================================
+   Print Styles
+   ============================================================================= */
+
+@media print {
+  .annotated-code {
+    display: block;
+  }
+
+  .annotated-code__margin {
+    margin-top: 2em;
+    page-break-inside: avoid;
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .annotated-code__margin::before {
+    display: none;
+  }
+
+  .annotation-note__body {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  .annotation-note__expand,
+  .annotation-hints {
+    display: none;
+  }
+}

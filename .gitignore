@@ -1,0 +1,6 @@
+# Development artifacts
+screenshots/
+scripts/
+
+# OS files
+.DS_Store

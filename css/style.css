@@ -1,0 +1,493 @@
+/**
+ * Production Agent Guide - Styles
+ *
+ * Design system adapted from thewayofcode.com
+ * Typography: Goudy Old Style (Adobe Typekit), Courier Prime for code
+ * Colors: Cream background, slate text
+ */
+
+/* =============================================================================
+   CSS Custom Properties (Design Tokens)
+   ============================================================================= */
+
+:root {
+  /* Colors - from thewayofcode.com */
+  --background-color: #FAF9F5;
+  --rubin-slate: #1F1E1D;
+  --rubin-gray: #87867F;
+  --rubin-cyan: #44A6E4;
+  --rubin-clay: #D97757;
+  --rubin-gold: #C5A84B;
+  --rubin-purple: #8B5CF6;
+
+  /* Semantic colors */
+  --color-text: var(--rubin-slate);
+  --color-text-muted: var(--rubin-gray);
+  --color-link: var(--rubin-cyan);
+  --color-accent: var(--rubin-clay);
+  --color-highlight: var(--rubin-gold);
+
+  /* Typography */
+  --font-family-base: "goudy-old-style", Georgia, "Times New Roman", serif;
+  --font-family-code: "Courier Prime", "Courier New", Courier, monospace;
+  --font-size-base: 22px;
+  --font-size-small: 16px;
+  --font-size-large: 28px;
+  --font-size-title: 48px;
+  --font-size-chapter: 72px;
+  --line-height-base: 1.6;
+  --line-height-tight: 1.3;
+  --letter-spacing-title: 0.3em;
+  --letter-spacing-wide: 0.1em;
+
+  /* Spacing */
+  --spacing-xs: 8px;
+  --spacing-sm: 16px;
+  --spacing-md: 24px;
+  --spacing-lg: 48px;
+  --spacing-xl: 80px;
+  --spacing-gap: 120px;
+
+  /* Layout */
+  --content-max-width: 1400px;
+  --sidebar-width: 120px;
+
+  /* Transitions */
+  --transition-fade: opacity 2s cubic-bezier(0.075, 0.82, 0.165, 1);
+  --transition-fast: all 0.2s ease;
+  --easing-primary: cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+/* =============================================================================
+   Base Reset & Typography
+   ============================================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+  font-size: var(--font-size-base);
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: 1rem;
+  line-height: var(--line-height-base);
+  color: var(--color-text);
+  background-color: var(--background-color);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =============================================================================
+   Scroll Snap Sections
+   ============================================================================= */
+
+.section {
+  height: 100vh;
+  max-height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Content wrapper for scaling */
+.section > * {
+  transform-origin: top left;
+}
+
+/* =============================================================================
+   Title Section (Homepage)
+   ============================================================================= */
+
+.section--title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.title {
+  font-size: var(--font-size-title);
+  font-weight: 400;
+  letter-spacing: var(--letter-spacing-title);
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-md);
+  opacity: 0;
+  animation: fadeIn 2s var(--easing-primary) forwards;
+}
+
+.subtitle {
+  font-size: var(--font-size-large);
+  font-weight: 400;
+  color: var(--color-text-muted);
+  opacity: 0;
+  animation: fadeIn 2s var(--easing-primary) 0.25s forwards;
+}
+
+.title-meta {
+  margin-top: var(--spacing-lg);
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  opacity: 0;
+  animation: fadeIn 2s var(--easing-primary) 0.5s forwards;
+}
+
+/* =============================================================================
+   Two-Column Layout
+   ============================================================================= */
+
+.section--content {
+  padding-left: calc(var(--sidebar-width) + var(--spacing-xl));
+}
+
+.content-grid {
+  display: flex;
+  gap: var(--spacing-gap);
+  max-width: var(--content-max-width);
+  width: 100%;
+}
+
+.content-text {
+  flex: 1;
+  max-width: 600px;
+}
+
+.content-code {
+  flex: 1;
+  max-width: 600px;
+}
+
+/* Staggered fade-in for content */
+.content-text,
+.content-code {
+  opacity: 0;
+  transition: var(--transition-fade);
+}
+
+.section.visible .content-text {
+  opacity: 1;
+  transition-delay: 0.25s;
+}
+
+.section.visible .content-code {
+  opacity: 1;
+  transition-delay: 0.5s;
+}
+
+/* =============================================================================
+   Chapter Numbers
+   ============================================================================= */
+
+.chapter-number {
+  font-size: var(--font-size-chapter);
+  font-weight: 400;
+  color: var(--color-text-muted);
+  line-height: 1;
+  margin-bottom: var(--spacing-md);
+  font-variant-numeric: oldstyle-nums;
+}
+
+.chapter-title {
+  font-size: var(--font-size-large);
+  font-weight: 400;
+  margin-bottom: var(--spacing-lg);
+  line-height: var(--line-height-tight);
+}
+
+/* =============================================================================
+   Typography Styles
+   ============================================================================= */
+
+h1, h2, h3, h4 {
+  font-weight: 400;
+  line-height: var(--line-height-tight);
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-md);
+}
+
+h2 {
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin-bottom: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+p {
+  margin-bottom: var(--spacing-sm);
+}
+
+blockquote {
+  border-left: 2px solid var(--color-text-muted);
+  padding-left: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+/* =============================================================================
+   Code Styling
+   ============================================================================= */
+
+code, pre {
+  font-family: var(--font-family-code);
+  font-size: 0.9rem;
+}
+
+code {
+  background: rgba(31, 30, 29, 0.05);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--rubin-slate);
+  color: var(--background-color);
+  padding: var(--spacing-md);
+  border-radius: 4px;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+/* Syntax highlighting colors */
+.token-keyword { color: var(--rubin-clay); }
+.token-string { color: var(--rubin-gold); }
+.token-comment { color: var(--rubin-gray); }
+.token-function { color: var(--rubin-cyan); }
+.token-type { color: var(--rubin-purple); }
+
+/* =============================================================================
+   Sidebar Navigation
+   ============================================================================= */
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--spacing-md);
+  z-index: 100;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  border-radius: 50%;
+  transition: var(--transition-fast);
+  font-variant-numeric: oldstyle-nums;
+}
+
+.sidebar-link:hover {
+  color: var(--color-text);
+  background: rgba(31, 30, 29, 0.05);
+}
+
+.sidebar-link.active {
+  color: var(--color-text);
+  background: rgba(31, 30, 29, 0.1);
+}
+
+/* =============================================================================
+   Links
+   ============================================================================= */
+
+a {
+  color: var(--color-link);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+/* =============================================================================
+   Lists
+   ============================================================================= */
+
+ul, ol {
+  margin: var(--spacing-sm) 0;
+  padding-left: var(--spacing-md);
+}
+
+li {
+  margin-bottom: var(--spacing-xs);
+}
+
+/* =============================================================================
+   Tables
+   ============================================================================= */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--spacing-md) 0;
+  font-size: 0.9rem;
+}
+
+th, td {
+  padding: var(--spacing-sm);
+  text-align: left;
+  border-bottom: 1px solid rgba(31, 30, 29, 0.1);
+}
+
+th {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+/* =============================================================================
+   Keyboard Hints
+   ============================================================================= */
+
+.keyboard-hints {
+  position: fixed;
+  bottom: var(--spacing-md);
+  right: var(--spacing-md);
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+body:hover .keyboard-hints,
+body:focus-within .keyboard-hints {
+  opacity: 1;
+}
+
+kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: var(--font-family-code);
+  font-size: 0.85em;
+  background: rgba(31, 30, 29, 0.05);
+  border: 1px solid rgba(31, 30, 29, 0.1);
+  border-radius: 3px;
+}
+
+/* =============================================================================
+   Animations
+   ============================================================================= */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =============================================================================
+   Responsive Design
+   ============================================================================= */
+
+@media (max-width: 1200px) {
+  .content-grid {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  .content-text,
+  .content-code {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --font-size-base: 18px;
+    --spacing-xl: 40px;
+    --spacing-gap: 40px;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .section--content {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+
+  .title {
+    font-size: 2rem;
+    letter-spacing: 0.15em;
+  }
+
+  .chapter-number {
+    font-size: 3rem;
+  }
+}
+
+/* =============================================================================
+   Print Styles
+   ============================================================================= */
+
+@media print {
+  html {
+    scroll-snap-type: none;
+  }
+
+  .section {
+    min-height: auto;
+    page-break-after: always;
+  }
+
+  .sidebar,
+  .keyboard-hints {
+    display: none;
+  }
+
+  pre {
+    background: #f5f5f5;
+    color: var(--color-text);
+  }
+}

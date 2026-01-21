@@ -1,0 +1,816 @@
+/**
+ * System Diagram - Core Loop with Infrastructure Layers
+ *
+ * "The loop is the architecture. Everything else is infrastructure."
+ */
+
+/* ============================================
+   CSS Variables
+   ============================================ */
+.sd {
+  --sd-cyan: #00d4ff;
+  --sd-coral: #ff6b4a;
+  --sd-gold: #ffd700;
+  --sd-bg: #0a0a0f;
+  --sd-surface: #12121a;
+  --sd-text: #e8e8ed;
+  --sd-text-dim: #4a4a5a;
+  --sd-transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  --sd-transition-fast: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   Section & Container
+   ============================================ */
+.system-overview {
+  min-height: 280vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 var(--space-4, 2rem);
+  padding-top: var(--space-8, 4rem);
+  position: relative;
+}
+
+.system-overview__header {
+  text-align: center;
+  margin-bottom: var(--space-4, 2rem);
+  position: sticky;
+  top: var(--space-4, 2rem);
+  z-index: 10;
+  background: linear-gradient(to bottom, var(--sd-bg, #0a0a0f) 70%, transparent);
+  padding-bottom: var(--space-4, 2rem);
+  width: 100%;
+}
+
+.system-overview__title {
+  font-size: var(--font-size-xl, 1.5rem);
+  font-weight: 400;
+  color: var(--text-primary, #e8e8ed);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-2, 0.5rem);
+}
+
+.system-overview__subtitle {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--text-muted, #6b6b7a);
+}
+
+.system-overview__diagram {
+  position: sticky;
+  top: 10vh;
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  justify-content: center;
+}
+
+.sd {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sd__stage {
+  position: relative;
+  width: 500px;
+  height: 500px;
+}
+
+/* ============================================
+   Infrastructure Rings
+   ============================================ */
+.sd__ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity var(--sd-transition);
+  pointer-events: none;
+}
+
+.sd__ring.is-visible {
+  opacity: 1;
+}
+
+.sd__ring.is-visible.is-dim {
+  opacity: 0.25;
+}
+
+.sd__ring.is-ambient {
+  opacity: 0.6;
+}
+
+.sd__ring--inner {
+  width: 340px;
+  height: 340px;
+}
+
+.sd__ring--outer {
+  width: 440px;
+  height: 440px;
+}
+
+.sd__ring-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.sd__ring-track {
+  fill: none;
+  stroke: var(--sd-gold);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 8;
+  opacity: 0.5;
+  transform-origin: center;
+}
+
+.sd__ring.is-visible .sd__ring-track--inner {
+  animation: ringRotate 60s linear infinite;
+}
+
+.sd__ring.is-visible .sd__ring-track--outer {
+  animation: ringRotateReverse 80s linear infinite;
+}
+
+@keyframes ringRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ringRotateReverse {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+/* Ring Labels - positioned absolutely around the ring */
+.sd__ring-labels {
+  position: absolute;
+  inset: 0;
+}
+
+.sd__ring-label {
+  position: absolute;
+  font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--sd-gold);
+  opacity: 0;
+  transition: opacity var(--sd-transition);
+  white-space: nowrap;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.sd__ring.is-visible .sd__ring-label {
+  opacity: 1;
+}
+
+.sd__ring.is-visible.is-dim .sd__ring-label {
+  opacity: 0.3;
+}
+
+.sd__ring.is-ambient .sd__ring-label {
+  opacity: 0.6;
+}
+
+/* Inner ring labels (3 items: Tools, Validation, State) */
+.sd__ring-labels--inner .sd__ring-label:nth-child(1) { /* Tools */
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.sd__ring-labels--inner .sd__ring-label:nth-child(2) { /* Validation */
+  bottom: 20%;
+  right: -5%;
+}
+.sd__ring-labels--inner .sd__ring-label:nth-child(3) { /* State */
+  bottom: 20%;
+  left: -5%;
+}
+
+/* Outer ring labels (4 items: Security, Eval, Ops, Orch) */
+.sd__ring-labels--outer .sd__ring-label:nth-child(1) { /* Security */
+  top: 12%;
+  right: 5%;
+}
+.sd__ring-labels--outer .sd__ring-label:nth-child(2) { /* Eval */
+  bottom: 12%;
+  right: 5%;
+}
+.sd__ring-labels--outer .sd__ring-label:nth-child(3) { /* Ops */
+  bottom: 12%;
+  left: 5%;
+}
+.sd__ring-labels--outer .sd__ring-label:nth-child(4) { /* Orch */
+  top: 12%;
+  left: 5%;
+}
+
+/* ============================================
+   Radial Connection Lines
+   ============================================ */
+.sd__radials {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.sd__radial-line {
+  stroke: var(--sd-gold);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0.5;
+  transition: opacity var(--sd-transition-fast);
+}
+
+.sd__radial-line--cyan {
+  stroke: var(--sd-cyan);
+  opacity: 0.6;
+}
+
+.sd__radial-line--coral {
+  stroke: var(--sd-coral);
+  opacity: 0.6;
+}
+
+.sd__radial-line--gold {
+  stroke: var(--sd-gold);
+  opacity: 0.6;
+}
+
+/* ============================================
+   Infrastructure Label Highlights
+   ============================================ */
+.sd__ring-label.is-connected {
+  color: var(--sd-cyan);
+  text-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+  opacity: 1 !important;
+}
+
+.sd[data-color="coral"] .sd__ring-label.is-connected {
+  color: var(--sd-coral);
+  text-shadow: 0 0 20px rgba(255, 107, 74, 0.6);
+}
+
+.sd[data-color="gold"] .sd__ring-label.is-connected {
+  color: var(--sd-gold);
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+/* ============================================
+   Core Diagram (4-node diamond)
+   ============================================ */
+.sd__core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  z-index: 5;
+}
+
+/* Progress Arc */
+.sd__progress {
+  position: absolute;
+  inset: -10px;
+  width: calc(100% + 20px);
+  height: calc(100% + 20px);
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+
+.sd__progress-track {
+  fill: none;
+  stroke: var(--sd-text-dim);
+  stroke-width: 1;
+  opacity: 0.15;
+}
+
+.sd__progress-fill {
+  fill: none;
+  stroke: var(--sd-gold);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 264;
+  stroke-dashoffset: 264;
+  transition: stroke-dashoffset var(--sd-transition), stroke var(--sd-transition-fast);
+}
+
+.sd[data-color="cyan"] .sd__progress-fill { stroke: var(--sd-cyan); }
+.sd[data-color="coral"] .sd__progress-fill { stroke: var(--sd-coral); }
+.sd[data-color="gold"] .sd__progress-fill { stroke: var(--sd-gold); }
+
+/* Connection Paths */
+.sd__paths {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.sd__path {
+  fill: none;
+  stroke: var(--sd-text-dim);
+  stroke-width: 1;
+  stroke-dasharray: 4 6;
+  opacity: 0.2;
+  transition: all var(--sd-transition);
+}
+
+.sd__path.is-active {
+  stroke-width: 2;
+  stroke-dasharray: none;
+  opacity: 0.8;
+}
+
+.sd__path.is-complete {
+  stroke: var(--sd-gold);
+  stroke-width: 1.5;
+  stroke-dasharray: none;
+  opacity: 0.4;
+}
+
+.sd__path.is-ambient {
+  stroke: var(--sd-gold);
+  stroke-width: 1;
+  stroke-dasharray: none;
+  opacity: 0.2;
+}
+
+.sd[data-color="cyan"] .sd__path.is-active { stroke: var(--sd-cyan); }
+.sd[data-color="coral"] .sd__path.is-active { stroke: var(--sd-coral); }
+.sd[data-color="gold"] .sd__path.is-active { stroke: var(--sd-gold); }
+
+/* Particle Canvas */
+.sd__particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ============================================
+   Core Nodes (Diamond Layout)
+   ============================================ */
+.sd__nodes {
+  position: absolute;
+  inset: 0;
+}
+
+.sd__node {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--sd-transition);
+}
+
+/* Diamond positions: top, right, bottom, left */
+.sd__node[data-node="ask"] {
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.sd__node[data-node="check"] {
+  top: 50%;
+  right: -22px;
+  transform: translateY(-50%);
+}
+
+.sd__node[data-node="run"] {
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.sd__node[data-node="see"] {
+  top: 50%;
+  left: -22px;
+  transform: translateY(-50%);
+}
+
+/* Node Core */
+.sd__node-ring {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid var(--sd-text-dim);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all var(--sd-transition);
+}
+
+.sd__node-core {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--sd-surface);
+  border: 1.5px solid var(--sd-text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--sd-transition);
+  position: relative;
+  z-index: 2;
+}
+
+.sd__node-core svg {
+  width: 20px;
+  height: 20px;
+  color: var(--sd-text-dim);
+  transition: color var(--sd-transition);
+}
+
+/* Active state */
+.sd__node.is-active .sd__node-ring {
+  opacity: 1;
+  transform: scale(1);
+  animation: nodeRingPulse 2s ease-in-out infinite;
+}
+
+.sd__node.is-active .sd__node-core {
+  border-color: var(--sd-gold);
+  box-shadow:
+    0 0 30px rgba(255, 215, 0, 0.3),
+    inset 0 0 20px rgba(255, 215, 0, 0.1);
+}
+
+.sd__node.is-active .sd__node-core svg {
+  color: var(--sd-gold);
+}
+
+@keyframes nodeRingPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.15); opacity: 0.8; }
+}
+
+/* Color-specific active states */
+.sd[data-color="cyan"] .sd__node.is-active .sd__node-ring {
+  border-color: var(--sd-cyan);
+}
+.sd[data-color="cyan"] .sd__node.is-active .sd__node-core {
+  border-color: var(--sd-cyan);
+  box-shadow:
+    0 0 30px rgba(0, 212, 255, 0.3),
+    inset 0 0 20px rgba(0, 212, 255, 0.1);
+}
+.sd[data-color="cyan"] .sd__node.is-active .sd__node-core svg {
+  color: var(--sd-cyan);
+}
+
+.sd[data-color="coral"] .sd__node.is-active .sd__node-ring {
+  border-color: var(--sd-coral);
+}
+.sd[data-color="coral"] .sd__node.is-active .sd__node-core {
+  border-color: var(--sd-coral);
+  box-shadow:
+    0 0 30px rgba(255, 107, 74, 0.3),
+    inset 0 0 20px rgba(255, 107, 74, 0.1);
+}
+.sd[data-color="coral"] .sd__node.is-active .sd__node-core svg {
+  color: var(--sd-coral);
+}
+
+.sd[data-color="gold"] .sd__node.is-active .sd__node-ring {
+  border-color: var(--sd-gold);
+}
+
+/* Complete state */
+.sd__node.is-complete .sd__node-core {
+  border-color: var(--sd-gold);
+  opacity: 0.7;
+}
+
+.sd__node.is-complete .sd__node-core svg {
+  color: var(--sd-gold);
+  opacity: 0.8;
+}
+
+/* Ambient state */
+.sd__node.is-ambient .sd__node-core {
+  border-color: var(--sd-gold);
+  opacity: 0.5;
+}
+
+.sd__node.is-ambient .sd__node-core svg {
+  color: var(--sd-gold);
+  opacity: 0.6;
+}
+
+/* ============================================
+   Info Panel (Below Stage)
+   ============================================ */
+.sd__info-panel {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--sd-transition);
+  z-index: 10;
+  width: 100%;
+}
+
+.sd__info-panel.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sd__info-label {
+  font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--sd-gold);
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.sd__info-text {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 0.9rem;
+  color: var(--sd-text);
+  opacity: 0.75;
+}
+
+/* Info panel color states */
+.sd__info-panel[data-color="cyan"] .sd__info-label { color: var(--sd-cyan); }
+.sd__info-panel[data-color="coral"] .sd__info-label { color: var(--sd-coral); }
+.sd__info-panel[data-color="gold"] .sd__info-label { color: var(--sd-gold); }
+
+/* ============================================
+   Center Label (Ambient Mode)
+   ============================================ */
+.sd__center-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--sd-gold);
+  opacity: 0;
+  visibility: hidden;
+  letter-spacing: 0.05em;
+  transition: opacity 0.8s ease;
+  text-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+  z-index: 10;
+}
+
+/* ============================================
+   Scroll Hint
+   ============================================ */
+.sd__scroll-hint {
+  position: absolute;
+  bottom: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+.sd__scroll-hint span {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 0.7rem;
+  color: var(--sd-text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.sd__scroll-hint svg {
+  width: 16px;
+  height: 16px;
+  color: var(--sd-text-dim);
+  animation: scrollBounce 2s ease-in-out infinite;
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+/* ============================================
+   Phase Indicator
+   ============================================ */
+.sd__phase-indicator {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.sd__phase-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sd-text-dim);
+  opacity: 0.3;
+  transition: all var(--sd-transition-fast);
+}
+
+.sd__phase-dot.is-active {
+  background: var(--sd-gold);
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+}
+
+/* ============================================
+   Architecture Quote
+   ============================================ */
+.sd__quote {
+  position: absolute;
+  bottom: -140px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--sd-transition);
+  white-space: nowrap;
+}
+
+.sd__quote.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sd__quote span {
+  display: block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.sd__quote span:first-child {
+  color: var(--sd-gold);
+  margin-bottom: 0.2rem;
+}
+
+.sd__quote-dim {
+  color: var(--sd-text-dim);
+  opacity: 0.6;
+}
+
+/* ============================================
+   Ambient Mode
+   ============================================ */
+.sd.is-ambient .sd__progress {
+  opacity: 0.4;
+}
+
+.sd.is-ambient .sd__progress-fill {
+  stroke-dashoffset: 0;
+  stroke: var(--sd-gold);
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 768px) {
+  .system-overview {
+    min-height: 240vh;
+  }
+
+  .sd__stage {
+    width: 380px;
+    height: 380px;
+  }
+
+  .sd__ring--inner {
+    width: 260px;
+    height: 260px;
+  }
+
+  .sd__ring--outer {
+    width: 340px;
+    height: 340px;
+  }
+
+  .sd__core {
+    width: 160px;
+    height: 160px;
+  }
+
+  .sd__node-core {
+    width: 36px;
+    height: 36px;
+  }
+
+  .sd__node-ring {
+    width: 46px;
+    height: 46px;
+  }
+
+  .sd__node-core svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .sd__node[data-node="ask"] { top: -18px; }
+  .sd__node[data-node="check"] { right: -18px; }
+  .sd__node[data-node="run"] { bottom: -18px; }
+  .sd__node[data-node="see"] { left: -18px; }
+
+  .sd__ring-label {
+    font-size: 0.55rem;
+  }
+
+  .sd__info-label {
+    font-size: 1.1rem;
+  }
+
+  .sd__info-text {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .system-overview {
+    min-height: 200vh;
+  }
+
+  .sd__stage {
+    width: 300px;
+    height: 300px;
+  }
+
+  .sd__ring--inner {
+    width: 200px;
+    height: 200px;
+  }
+
+  .sd__ring--outer {
+    width: 270px;
+    height: 270px;
+  }
+
+  .sd__core {
+    width: 130px;
+    height: 130px;
+  }
+
+  .sd__node-core {
+    width: 32px;
+    height: 32px;
+  }
+
+  .sd__node[data-node="ask"] { top: -16px; }
+  .sd__node[data-node="check"] { right: -16px; }
+  .sd__node[data-node="run"] { bottom: -16px; }
+  .sd__node[data-node="see"] { left: -16px; }
+
+  .sd__ring-label {
+    font-size: 0.5rem;
+  }
+
+  .sd__info-label {
+    font-size: 1rem;
+  }
+}
+
+/* ============================================
+   Reduced Motion
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  .sd__path,
+  .sd__node,
+  .sd__node-ring,
+  .sd__node-core,
+  .sd__ring,
+  .sd__progress-fill,
+  .sd__info-panel {
+    transition: none;
+  }
+
+  .sd__scroll-hint svg,
+  .sd__ring.is-visible .sd__ring-track--inner,
+  .sd__ring.is-visible .sd__ring-track--outer,
+  .sd__node.is-active .sd__node-ring {
+    animation: none;
+  }
+}
