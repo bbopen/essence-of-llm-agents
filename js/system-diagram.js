@@ -1,633 +1,326 @@
 /**
- * System Diagram - Core Loop with Infrastructure Layers
- *
- * "The loop is the architecture. Everything else is infrastructure."
- *
- * Visual concept: 4-step core loop at center, infrastructure rings orbiting around.
- * Scroll reveals: Core steps first, then inner ring, then outer ring, then ambient.
+ * System Architecture Diagram - Clean Flow Style
+ * With tooltips, infrastructure mapping, visual loop, and interactive connections
  */
 
 (function() {
   'use strict';
 
-  // The 4-step core loop - matches the guide exactly
-  const CORE_STEPS = [
-    {
-      id: 'ask',
-      label: 'ASK',
-      node: 'ask',
-      color: 'cyan',
-      annotation: 'Request action from LLM',
-      detail: 'The stochastic moment. Context flows in, the model decides.'
+  // Infrastructure items with their descriptions
+  const INFRA_DETAILS = {
+    'Prompt': {
+      desc: 'System instructions, user messages, and conversation history',
+      flow: 'in'
     },
-    {
-      id: 'check',
-      label: 'CHECK',
-      node: 'check',
-      color: 'coral',
-      annotation: 'Validate the action',
-      detail: 'Safety layers verify: Layer 0 → 1 → 2. Lower overrides higher.'
+    'Tools': {
+      desc: 'Tool schemas for LLM, implementations for execution',
+      flow: 'both'
     },
-    {
-      id: 'run',
-      label: 'RUN',
-      node: 'run',
-      color: 'coral',
-      annotation: 'Execute the tool',
-      detail: 'Deterministic execution. Your code — predictable, testable.'
+    'State': {
+      desc: 'Event log, filesystem persistence, and context management',
+      flow: 'both'
     },
-    {
-      id: 'see',
-      label: 'SEE',
-      node: 'see',
-      color: 'gold',
-      annotation: 'Observe the result',
-      detail: 'Record the outcome. Result becomes context for next iteration.'
+    'Verification': {
+      desc: 'Input validation and action approval gates (Layer 0-2)',
+      flow: 'in'
+    },
+    'Security': {
+      desc: 'Permission checks, sandboxing, and defense-in-depth',
+      flow: 'in'
+    },
+    'Evaluation': {
+      desc: 'Result assessment, quality metrics, feeds back to improve',
+      flow: 'both'
+    },
+    'Operations': {
+      desc: 'Retries, rate limits, circuit breakers, resilience patterns',
+      flow: 'out'
+    },
+    'Orchestration': {
+      desc: 'Loop lifecycle, termination conditions, task decomposition',
+      flow: 'both'
     }
-  ];
-
-  // Infrastructure layers that wrap the core
-  const INFRA_INNER = [
-    { id: 'tools', label: 'Tools', section: '02' },
-    { id: 'validation', label: 'Validation', section: '03' },
-    { id: 'state', label: 'State', section: '04' }
-  ];
-
-  const INFRA_OUTER = [
-    { id: 'security', label: 'Security', section: '05' },
-    { id: 'evaluation', label: 'Eval', section: '06' },
-    { id: 'operations', label: 'Ops', section: '07' },
-    { id: 'orchestration', label: 'Orch', section: '08' }
-  ];
-
-  // Which infrastructure elements relate to each core step
-  const STEP_CONNECTIONS = {
-    ask: ['tools', 'state'],
-    check: ['validation', 'security'],
-    run: ['tools', 'operations'],
-    see: ['state', 'evaluation']
   };
 
-  class SystemDiagram {
-    constructor(container) {
-      this.container = container;
-      this.section = document.querySelector('#system');
-      this.currentStep = -1;
-      this.phase = 'idle'; // idle, core, inner, outer, ambient
-      this.hasCompletedOnce = false;
-      this.animationFrame = null;
-      this.particles = [];
-
-      this.init();
-    }
-
-    init() {
-      this.render();
-      this.cacheElements();
-      this.createParticles();
-      this.setupScrollObserver();
-      this.animateParticles();
-    }
-
-    render() {
-      this.container.innerHTML = `
-        <div class="sd">
-          <div class="sd__stage">
-            <!-- Outer infrastructure ring -->
-            <div class="sd__ring sd__ring--outer">
-              <svg class="sd__ring-svg" viewBox="0 0 400 400">
-                <circle class="sd__ring-track sd__ring-track--outer" cx="200" cy="200" r="185" />
-              </svg>
-              <div class="sd__ring-labels sd__ring-labels--outer">
-                ${INFRA_OUTER.map((item, i) => {
-                  const angle = (i * 90) - 45; // Position at 45, 135, 225, 315 degrees
-                  return `<span class="sd__ring-label" data-infra="${item.id}" style="--angle: ${angle}deg">${item.label}</span>`;
-                }).join('')}
-              </div>
-            </div>
-
-            <!-- Inner infrastructure ring -->
-            <div class="sd__ring sd__ring--inner">
-              <svg class="sd__ring-svg" viewBox="0 0 400 400">
-                <circle class="sd__ring-track sd__ring-track--inner" cx="200" cy="200" r="140" />
-              </svg>
-              <div class="sd__ring-labels sd__ring-labels--inner">
-                ${INFRA_INNER.map((item, i) => {
-                  const angle = (i * 120) - 90; // Position at -90, 30, 150 degrees (top, bottom-right, bottom-left)
-                  return `<span class="sd__ring-label" data-infra="${item.id}" style="--angle: ${angle}deg">${item.label}</span>`;
-                }).join('')}
-              </div>
-            </div>
-
-            <!-- Connection lines from core to infrastructure -->
-            <svg class="sd__radials" viewBox="0 0 500 500">
-              <g class="sd__radial-lines"></g>
-            </svg>
-
-            <!-- Core diagram - the 4-step loop -->
-            <div class="sd__core">
-              <!-- Progress arc for core loop -->
-              <svg class="sd__progress" viewBox="0 0 100 100">
-                <circle class="sd__progress-track" cx="50" cy="50" r="42" />
-                <circle class="sd__progress-fill" cx="50" cy="50" r="42" />
-              </svg>
-
-              <!-- Connection paths forming a diamond -->
-              <svg class="sd__paths" viewBox="0 0 200 200">
-                <path class="sd__path" data-from="ask" data-to="check"
-                      d="M 100 20 L 180 100" />
-                <path class="sd__path" data-from="check" data-to="run"
-                      d="M 180 100 L 100 180" />
-                <path class="sd__path" data-from="run" data-to="see"
-                      d="M 100 180 L 20 100" />
-                <path class="sd__path" data-from="see" data-to="ask"
-                      d="M 20 100 L 100 20" />
-              </svg>
-
-              <!-- Particle canvas -->
-              <canvas class="sd__particles"></canvas>
-
-              <!-- Core nodes -->
-              <div class="sd__nodes">
-                <div class="sd__node" data-node="ask">
-                  <div class="sd__node-ring"></div>
-                  <div class="sd__node-core">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <circle cx="12" cy="12" r="3"/>
-                      <path d="M12 2v4m0 12v4m10-10h-4M6 12H2m15.07-7.07l-2.83 2.83m-8.48 8.48l-2.83 2.83m0-14.14l2.83 2.83m8.48 8.48l2.83 2.83"/>
-                    </svg>
-                  </div>
-                </div>
-
-                <div class="sd__node" data-node="check">
-                  <div class="sd__node-ring"></div>
-                  <div class="sd__node-core">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                      <path d="M9 12l2 2 4-4"/>
-                    </svg>
-                  </div>
-                </div>
-
-                <div class="sd__node" data-node="run">
-                  <div class="sd__node-ring"></div>
-                  <div class="sd__node-core">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <polygon points="5 3 19 12 5 21 5 3"/>
-                    </svg>
-                  </div>
-                </div>
-
-                <div class="sd__node" data-node="see">
-                  <div class="sd__node-ring"></div>
-                  <div class="sd__node-core">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                      <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Center label for ambient mode -->
-              <div class="sd__center-label">while(true)</div>
-            </div>
-
-            <!-- Step info panel - appears below core -->
-            <div class="sd__info-panel">
-              <div class="sd__info-label"></div>
-              <div class="sd__info-text"></div>
-            </div>
-          </div>
-
-          <!-- Scroll hint -->
-          <div class="sd__scroll-hint">
-            <span>Scroll to explore</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 5v14M19 12l-7 7-7-7"/>
-            </svg>
-          </div>
-
-          <!-- Phase indicators -->
-          <div class="sd__phase-indicator">
-            <span class="sd__phase-dot" data-phase="core"></span>
-            <span class="sd__phase-dot" data-phase="inner"></span>
-            <span class="sd__phase-dot" data-phase="outer"></span>
-          </div>
-
-          <!-- Architecture quote -->
-          <div class="sd__quote">
-            <span>The loop is the architecture.</span>
-            <span class="sd__quote-dim">Everything else is infrastructure.</span>
-          </div>
-        </div>
-      `;
-    }
-
-    cacheElements() {
-      this.root = this.container.querySelector('.sd');
-      this.stage = this.container.querySelector('.sd__stage');
-      this.core = this.container.querySelector('.sd__core');
-      this.progressFill = this.container.querySelector('.sd__progress-fill');
-      this.nodes = this.container.querySelectorAll('.sd__node');
-      this.paths = this.container.querySelectorAll('.sd__path');
-      this.canvas = this.container.querySelector('.sd__particles');
-      this.ctx = this.canvas.getContext('2d');
-      this.centerLabel = this.container.querySelector('.sd__center-label');
-      this.scrollHint = this.container.querySelector('.sd__scroll-hint');
-      this.infoPanel = this.container.querySelector('.sd__info-panel');
-      this.infoLabel = this.container.querySelector('.sd__info-label');
-      this.infoText = this.container.querySelector('.sd__info-text');
-      this.innerRing = this.container.querySelector('.sd__ring--inner');
-      this.outerRing = this.container.querySelector('.sd__ring--outer');
-      this.phaseDots = this.container.querySelectorAll('.sd__phase-dot');
-      this.quote = this.container.querySelector('.sd__quote');
-      this.infraLabels = this.container.querySelectorAll('.sd__ring-label');
-      this.radialLines = this.container.querySelector('.sd__radial-lines');
-    }
-
-    createParticles() {
-      const rect = this.canvas.getBoundingClientRect();
-      this.canvas.width = rect.width * window.devicePixelRatio;
-      this.canvas.height = rect.height * window.devicePixelRatio;
-      this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-
-      this.particles = [];
-      for (let i = 0; i < 20; i++) {
-        this.particles.push({
-          progress: Math.random(),
-          speed: 0.002 + Math.random() * 0.003,
-          size: 1.5 + Math.random() * 2,
-          opacity: 0.3 + Math.random() * 0.4
-        });
+  const STEPS = [
+    {
+      id: 'invoke',
+      code: 'llm.invoke()',
+      desc: 'LLM decides',
+      type: 'stochastic',
+      tooltip: {
+        title: 'Generate Action',
+        text: 'The stochastic moment. LLM receives context and decides what to do next.',
+        receives: 'context (from observe)',
+        returns: 'proposed action',
+        infra: ['Prompt', 'Tools', 'State', 'Orchestration']
+      }
+    },
+    {
+      id: 'validate',
+      code: 'isValid()',
+      desc: 'Check safety',
+      type: 'deterministic',
+      tooltip: {
+        title: 'Validate Action',
+        text: 'Safety layers check the action. Layer 0 → 1 → 2. Lower overrides higher.',
+        receives: 'proposed action',
+        returns: 'allow → execute, deny → error to LLM',
+        infra: ['Verification', 'Security', 'Orchestration']
+      }
+    },
+    {
+      id: 'execute',
+      code: 'execute()',
+      desc: 'Run tool',
+      type: 'deterministic',
+      tooltip: {
+        title: 'Execute Tool',
+        text: 'Your code runs the tool. Deterministic dispatch, though tool results may vary.',
+        receives: 'approved action',
+        returns: 'tool result (success or error)',
+        infra: ['Tools', 'Operations', 'Orchestration']
+      }
+    },
+    {
+      id: 'observe',
+      code: 'observe()',
+      desc: 'Record result',
+      type: 'deterministic',
+      tooltip: {
+        title: 'Observe Result',
+        text: 'Append result to context. This feeds back to llm.invoke() for the next iteration.',
+        receives: 'tool result',
+        returns: 'updated context → back to invoke',
+        infra: ['State', 'Evaluation', 'Orchestration']
       }
     }
+  ];
 
-    setupScrollObserver() {
-      if (!this.section) return;
+  const INFRA = {
+    context: [
+      { label: 'Prompt', section: 'prompt', num: '02', usedBy: ['invoke'] },
+      { label: 'Tools', section: 'tools', num: '03', usedBy: ['invoke', 'execute'] },
+      { label: 'State', section: 'state', num: '05', usedBy: ['invoke', 'observe'] }
+    ],
+    operations: [
+      { label: 'Verification', section: 'verification', num: '04', usedBy: ['validate'] },
+      { label: 'Security', section: 'security', num: '06', usedBy: ['validate'] },
+      { label: 'Evaluation', section: 'evaluation', num: '07', usedBy: ['observe'] },
+      { label: 'Operations', section: 'ops', num: '08', usedBy: ['execute'] },
+      { label: 'Orchestration', section: 'orchestration', num: '09', usedBy: ['invoke', 'validate', 'execute', 'observe'] }
+    ]
+  };
 
-      const updateStep = () => {
-        const rect = this.section.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const stickyTop = viewportHeight * 0.12;
-        const isStuck = rect.top <= stickyTop && rect.bottom > viewportHeight;
-        const scrolledPast = rect.bottom <= viewportHeight && rect.top < 0;
+  function render(container) {
+    container.innerHTML = `
+      <div class="arch">
+        <!-- The Loop -->
+        <div class="arch__loop">
+          <div class="arch__loop-header">
+            <span class="arch__loop-keyword">while (true)</span>
+            <span class="arch__loop-title">// the agent loop</span>
+          </div>
 
-        // If scrolled past the section, maintain ambient mode
-        if (scrolledPast) {
-          if (this.phase !== 'ambient' && this.hasCompletedOnce) {
-            this.phase = 'ambient';
-            this.enterAmbientMode();
-          }
-          return;
+          <div class="arch__flow">
+            <!-- Loop-back arrow -->
+            <div class="arch__loop-back">
+              <svg viewBox="0 0 600 30" preserveAspectRatio="none">
+                <defs>
+                  <marker id="loopArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+                    <path d="M0,0 L8,4 L0,8 Z" class="arch__loop-back-arrow"/>
+                  </marker>
+                </defs>
+                <path class="arch__loop-back-path"
+                      d="M 540 25 C 540 5, 520 5, 480 5 L 120 5 C 80 5, 60 5, 60 25"
+                      marker-end="url(#loopArrow)"/>
+              </svg>
+              <span class="arch__loop-back-label">context</span>
+            </div>
+
+            ${STEPS.map((step, i) => `
+              <a href="#${step.id === 'invoke' ? 'loop' : step.id === 'validate' ? 'verification' : step.id === 'execute' ? 'tools' : 'state'}"
+                 class="arch__step"
+                 data-type="${step.type}"
+                 tabindex="0">
+                <div class="arch__tooltip">
+                  <div class="arch__tooltip-title">${step.tooltip.title}</div>
+                  <div class="arch__tooltip-text">${step.tooltip.text}</div>
+                  <div class="arch__tooltip-io">
+                    <div><span>receives:</span> <span class="in">${step.tooltip.receives}</span></div>
+                    <div><span>returns:</span> <span class="out">${step.tooltip.returns}</span></div>
+                  </div>
+                  <div class="arch__tooltip-infra">
+                    <span>uses:</span> ${step.tooltip.infra.join(', ')}
+                  </div>
+                </div>
+                <span class="arch__step-num">${i + 1}</span>
+                <div class="arch__step-box">
+                  <span class="arch__step-code">${step.code}</span>
+                </div>
+                <span class="arch__step-desc">${step.desc}</span>
+                <span class="arch__step-type">${step.type}</span>
+              </a>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Infrastructure -->
+        <div class="arch__infra">
+          <div class="arch__infra-group" data-group="context">
+            <div class="arch__infra-header">
+              <div class="arch__infra-title">Context</div>
+              <div class="arch__infra-subtitle">feeds into the loop</div>
+            </div>
+            <div class="arch__infra-list">
+              ${INFRA.context.map(item => `
+                <a href="#${item.section}"
+                   class="arch__infra-item"
+                   data-infra="${item.label.toLowerCase()}"
+                   data-used-by="${item.usedBy.join(',')}"
+                   data-flow="${INFRA_DETAILS[item.label]?.flow || 'both'}">
+                  <div class="arch__infra-item-main">
+                    <span class="arch__infra-icon arch__infra-icon--${INFRA_DETAILS[item.label]?.flow || 'both'}"></span>
+                    <span class="arch__infra-label">${item.label}</span>
+                    <span class="arch__infra-num">${item.num}</span>
+                  </div>
+                  <div class="arch__infra-desc">${INFRA_DETAILS[item.label]?.desc || ''}</div>
+                  <div class="arch__infra-flow">
+                    ${item.usedBy.length ? `<span class="arch__infra-used">→ ${item.usedBy.map(s => STEPS.find(st => st.id === s)?.code).join(', ')}</span>` : ''}
+                  </div>
+                </a>
+              `).join('')}
+            </div>
+          </div>
+          <div class="arch__infra-group" data-group="operations">
+            <div class="arch__infra-header">
+              <div class="arch__infra-title">Operations</div>
+              <div class="arch__infra-subtitle">processes loop actions</div>
+            </div>
+            <div class="arch__infra-list">
+              ${INFRA.operations.map(item => `
+                <a href="#${item.section}"
+                   class="arch__infra-item"
+                   data-infra="${item.label.toLowerCase()}"
+                   data-used-by="${item.usedBy.join(',')}"
+                   data-flow="${INFRA_DETAILS[item.label]?.flow || 'both'}">
+                  <div class="arch__infra-item-main">
+                    <span class="arch__infra-icon arch__infra-icon--${INFRA_DETAILS[item.label]?.flow || 'both'}"></span>
+                    <span class="arch__infra-label">${item.label}</span>
+                    <span class="arch__infra-num">${item.num}</span>
+                  </div>
+                  <div class="arch__infra-desc">${INFRA_DETAILS[item.label]?.desc || ''}</div>
+                  <div class="arch__infra-flow">
+                    ${item.usedBy.length ? `<span class="arch__infra-used">→ ${item.usedBy.map(s => STEPS.find(st => st.id === s)?.code).join(', ')}</span>` : ''}
+                  </div>
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="arch__footer">
+          <div class="arch__quote">"The loop is the architecture."</div>
+          <div class="arch__quote-sub">Everything else is infrastructure.</div>
+        </div>
+      </div>
+    `;
+
+    // Smooth scroll
+    container.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        const target = document.getElementById(link.getAttribute('href').slice(1));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth' });
         }
+      });
+    });
 
-        // If not yet stuck (above the section), reset to idle
-        if (!isStuck) {
-          if (this.phase !== 'idle') {
-            this.phase = 'idle';
-            this.currentStep = -1;
-            this.clearAll();
+    // Bidirectional highlighting: step ↔ infrastructure
+    const arch = container.querySelector('.arch');
+    const steps = container.querySelectorAll('.arch__step');
+    const infraItems = container.querySelectorAll('.arch__infra-item');
+
+    // Step hover → highlight related infrastructure
+    steps.forEach(step => {
+      const stepId = step.querySelector('a')?.getAttribute('href')?.slice(1) ||
+                     step.getAttribute('href')?.replace('#', '') ||
+                     STEPS.find(s => step.querySelector('.arch__step-code')?.textContent.includes(s.code))?.id;
+
+      // Find the step's infra from STEPS data
+      const stepData = STEPS.find(s => s.id === stepId || step.querySelector('.arch__step-code')?.textContent === s.code);
+      const infraNames = stepData?.tooltip?.infra || [];
+
+      step.addEventListener('mouseenter', () => {
+        arch.classList.add('arch--step-hover');
+        step.classList.add('arch__step--active');
+
+        // Highlight matching infrastructure items
+        infraItems.forEach(item => {
+          const infraLabel = item.querySelector('.arch__infra-label')?.textContent;
+          if (infraNames.includes(infraLabel)) {
+            item.classList.add('arch__infra-item--active');
+          } else {
+            item.classList.add('arch__infra-item--dimmed');
           }
-          return;
-        }
+        });
+      });
 
-        const scrollAmount = stickyTop - rect.top;
-        const scrollableRange = rect.height - viewportHeight;
-        const scrollProgress = Math.max(0, Math.min(1, scrollAmount / scrollableRange));
+      step.addEventListener('mouseleave', () => {
+        arch.classList.remove('arch--step-hover');
+        step.classList.remove('arch__step--active');
+        infraItems.forEach(item => {
+          item.classList.remove('arch__infra-item--active', 'arch__infra-item--dimmed');
+        });
+      });
+    });
 
-        // Phase boundaries
-        // 0-60%: Core loop steps (4 steps)
-        // 60-75%: Inner infrastructure ring
-        // 75-90%: Outer infrastructure ring
-        // 90-100%: Ambient mode
+    // Infrastructure hover → highlight related steps
+    infraItems.forEach(item => {
+      const usedByAttr = item.getAttribute('data-used-by');
+      const usedBySteps = usedByAttr ? usedByAttr.split(',').filter(Boolean) : [];
 
-        const coreEnd = 0.55;
-        const innerEnd = 0.70;
-        const outerEnd = 0.85;
+      item.addEventListener('mouseenter', () => {
+        arch.classList.add('arch--infra-hover');
+        item.classList.add('arch__infra-item--active');
 
-        if (scrollProgress < coreEnd) {
-          // Core loop phase
-          const coreProgress = scrollProgress / coreEnd;
-          const newStep = Math.min(CORE_STEPS.length - 1, Math.floor(coreProgress * CORE_STEPS.length));
-
-          if (this.phase !== 'core' || this.currentStep !== newStep) {
-            this.phase = 'core';
-            this.currentStep = newStep;
-            this.setCoreStep(newStep);
+        // Highlight matching steps
+        steps.forEach(step => {
+          const stepCode = step.querySelector('.arch__step-code')?.textContent;
+          const stepData = STEPS.find(s => s.code === stepCode);
+          if (stepData && usedBySteps.includes(stepData.id)) {
+            step.classList.add('arch__step--active');
+          } else {
+            step.classList.add('arch__step--dimmed');
           }
-        } else if (scrollProgress < innerEnd) {
-          // Inner infrastructure reveal
-          if (this.phase !== 'inner') {
-            this.phase = 'inner';
-            this.currentStep = -1;
-            this.showInnerRing();
+        });
+
+        // Dim other infrastructure items
+        infraItems.forEach(other => {
+          if (other !== item) {
+            other.classList.add('arch__infra-item--dimmed');
           }
-        } else if (scrollProgress < outerEnd) {
-          // Outer infrastructure reveal
-          if (this.phase !== 'outer') {
-            this.phase = 'outer';
-            this.currentStep = -1;
-            this.showOuterRing();
-            this.hasCompletedOnce = true;
-          }
-        } else {
-          // Ambient mode
-          if (this.phase !== 'ambient') {
-            this.phase = 'ambient';
-            this.enterAmbientMode();
-          }
-        }
-
-        this.updatePhaseIndicator();
-      };
-
-      window.addEventListener('scroll', updateStep, { passive: true });
-      updateStep();
-    }
-
-    setCoreStep(index) {
-      const step = CORE_STEPS[index];
-      if (!step) return;
-
-      this.root.dataset.phase = 'core';
-      this.root.dataset.step = index;
-      this.root.dataset.color = step.color;
-
-      // Update progress arc (circumference ≈ 264 for r=42)
-      const progress = ((index + 1) / CORE_STEPS.length) * 264;
-      this.progressFill.style.strokeDashoffset = 264 - progress;
-
-      // Hide scroll hint after first interaction
-      this.scrollHint.style.opacity = index > 0 ? '0' : '1';
-
-      // Update info panel
-      this.infoLabel.textContent = step.label;
-      this.infoText.textContent = step.annotation;
-      this.infoPanel.classList.add('is-visible');
-      this.infoPanel.dataset.color = step.color;
-
-      // Update nodes
-      this.nodes.forEach(node => {
-        const isActive = node.dataset.node === step.node;
-        node.classList.toggle('is-active', isActive);
+        });
       });
 
-      // Update paths - highlight the path TO the current node
-      this.paths.forEach(path => {
-        const isActive = path.dataset.to === step.node;
-        path.classList.toggle('is-active', isActive);
+      item.addEventListener('mouseleave', () => {
+        arch.classList.remove('arch--infra-hover');
+        item.classList.remove('arch__infra-item--active');
+        steps.forEach(step => {
+          step.classList.remove('arch__step--active', 'arch__step--dimmed');
+        });
+        infraItems.forEach(other => {
+          other.classList.remove('arch__infra-item--dimmed');
+        });
       });
-
-      // Show rings dimly during core phase to provide context
-      this.innerRing.classList.add('is-visible', 'is-dim');
-      this.outerRing.classList.add('is-visible', 'is-dim');
-      this.quote.classList.remove('is-visible');
-
-      // Highlight related infrastructure labels
-      const relatedInfra = STEP_CONNECTIONS[step.id] || [];
-      this.infraLabels.forEach(label => {
-        const infraId = label.dataset.infra;
-        const isConnected = relatedInfra.includes(infraId);
-        label.classList.toggle('is-connected', isConnected);
-      });
-
-      // Draw radial connection lines
-      this.drawRadialLines(step.id, step.color);
-    }
-
-    showInnerRing() {
-      this.root.dataset.phase = 'inner';
-      this.root.removeAttribute('data-step');
-      this.root.dataset.color = 'gold';
-
-      // Show complete loop
-      this.progressFill.style.strokeDashoffset = 0;
-
-      // Clear active states, show all nodes dimly
-      this.nodes.forEach(node => {
-        node.classList.remove('is-active');
-        node.classList.add('is-complete');
-      });
-      this.paths.forEach(path => {
-        path.classList.remove('is-active');
-        path.classList.add('is-complete');
-      });
-
-      // Update info panel
-      this.infoLabel.textContent = 'INFRASTRUCTURE';
-      this.infoText.textContent = 'Tools, Validation, and State wrap the core loop';
-      this.infoPanel.dataset.color = 'gold';
-
-      // Reveal inner ring fully (remove dim)
-      this.innerRing.classList.add('is-visible');
-      this.innerRing.classList.remove('is-dim');
-      this.outerRing.classList.remove('is-visible', 'is-dim');
-      this.scrollHint.style.opacity = '0';
-      this.centerLabel.style.opacity = '0';
-      this.centerLabel.style.visibility = 'hidden';
-      this.root.classList.remove('is-ambient');
-
-      // Clear infrastructure highlights and radial lines
-      this.infraLabels.forEach(label => label.classList.remove('is-connected'));
-      this.clearRadialLines();
-    }
-
-    showOuterRing() {
-      this.root.dataset.phase = 'outer';
-      this.root.dataset.color = 'gold';
-
-      // Update info panel
-      this.infoLabel.textContent = 'OPERATIONS';
-      this.infoText.textContent = 'Security, Evaluation, Ops, and Orchestration protect the system';
-      this.infoPanel.classList.add('is-visible');
-      this.infoPanel.dataset.color = 'gold';
-
-      // Reveal both rings fully (remove dim)
-      this.innerRing.classList.add('is-visible');
-      this.innerRing.classList.remove('is-dim');
-      this.outerRing.classList.add('is-visible');
-      this.outerRing.classList.remove('is-dim');
-      this.quote.classList.add('is-visible');
-      this.centerLabel.style.opacity = '0';
-      this.centerLabel.style.visibility = 'hidden';
-      this.root.classList.remove('is-ambient');
-
-      // Clear infrastructure highlights and radial lines
-      this.infraLabels.forEach(label => label.classList.remove('is-connected'));
-      this.clearRadialLines();
-    }
-
-    enterAmbientMode() {
-      this.root.dataset.phase = 'ambient';
-      this.root.classList.add('is-ambient');
-
-      this.centerLabel.style.opacity = '1';
-      this.centerLabel.style.visibility = 'visible';
-
-      this.infoPanel.classList.remove('is-visible');
-      this.innerRing.classList.add('is-visible', 'is-ambient');
-      this.outerRing.classList.add('is-visible', 'is-ambient');
-      this.quote.classList.add('is-visible');
-
-      // Clear infrastructure highlights and radial lines
-      this.infraLabels.forEach(label => label.classList.remove('is-connected'));
-      this.clearRadialLines();
-
-      this.nodes.forEach(node => {
-        node.classList.remove('is-active', 'is-complete');
-        node.classList.add('is-ambient');
-      });
-      this.paths.forEach(path => {
-        path.classList.remove('is-active', 'is-complete');
-        path.classList.add('is-ambient');
-      });
-    }
-
-    clearAll() {
-      this.root.removeAttribute('data-phase');
-      this.root.removeAttribute('data-step');
-      this.root.removeAttribute('data-color');
-      this.root.classList.remove('is-ambient');
-
-      this.progressFill.style.strokeDashoffset = 264;
-      this.scrollHint.style.opacity = '1';
-      this.infoPanel.classList.remove('is-visible');
-      this.innerRing.classList.remove('is-visible', 'is-ambient', 'is-dim');
-      this.outerRing.classList.remove('is-visible', 'is-ambient', 'is-dim');
-      this.quote.classList.remove('is-visible');
-
-      // Clear infrastructure highlights
-      this.infraLabels.forEach(label => label.classList.remove('is-connected'));
-      this.centerLabel.style.opacity = '0';
-      this.centerLabel.style.visibility = 'hidden';
-
-      this.nodes.forEach(node => {
-        node.classList.remove('is-active', 'is-complete', 'is-ambient');
-      });
-      this.paths.forEach(path => {
-        path.classList.remove('is-active', 'is-complete', 'is-ambient');
-      });
-
-      // Clear radial lines
-      this.radialLines.innerHTML = '';
-    }
-
-    drawRadialLines(stepId, color) {
-      // Clear previous lines
-      this.radialLines.innerHTML = '';
-
-      const relatedInfra = STEP_CONNECTIONS[stepId] || [];
-      if (relatedInfra.length === 0) return;
-
-      // Get stage rect for coordinate conversion
-      const stageRect = this.stage.getBoundingClientRect();
-
-      // Get active node position
-      const activeNode = this.container.querySelector(`.sd__node[data-node="${stepId}"]`);
-      if (!activeNode) return;
-      const nodeRect = activeNode.getBoundingClientRect();
-      const nodeX = ((nodeRect.left + nodeRect.width / 2) - stageRect.left) / stageRect.width * 500;
-      const nodeY = ((nodeRect.top + nodeRect.height / 2) - stageRect.top) / stageRect.height * 500;
-
-      // Draw lines to each related infrastructure label
-      relatedInfra.forEach(infraId => {
-        const label = this.container.querySelector(`.sd__ring-label[data-infra="${infraId}"]`);
-        if (!label) return;
-
-        const labelRect = label.getBoundingClientRect();
-        const labelX = ((labelRect.left + labelRect.width / 2) - stageRect.left) / stageRect.width * 500;
-        const labelY = ((labelRect.top + labelRect.height / 2) - stageRect.top) / stageRect.height * 500;
-
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', nodeX);
-        line.setAttribute('y1', nodeY);
-        line.setAttribute('x2', labelX);
-        line.setAttribute('y2', labelY);
-        line.setAttribute('class', `sd__radial-line sd__radial-line--${color}`);
-        this.radialLines.appendChild(line);
-      });
-    }
-
-    clearRadialLines() {
-      this.radialLines.innerHTML = '';
-    }
-
-    updatePhaseIndicator() {
-      this.phaseDots.forEach(dot => {
-        const dotPhase = dot.dataset.phase;
-        const isActive =
-          (dotPhase === 'core' && this.phase === 'core') ||
-          (dotPhase === 'inner' && (this.phase === 'inner' || this.phase === 'outer' || this.phase === 'ambient')) ||
-          (dotPhase === 'outer' && (this.phase === 'outer' || this.phase === 'ambient'));
-        dot.classList.toggle('is-active', isActive);
-      });
-    }
-
-    animateParticles() {
-      const width = this.canvas.width / window.devicePixelRatio;
-      const height = this.canvas.height / window.devicePixelRatio;
-
-      this.ctx.clearRect(0, 0, width, height);
-
-      // Diamond points for 4-node layout
-      const cx = width / 2;
-      const cy = height / 2;
-      const r = Math.min(width, height) * 0.38;
-
-      const points = [
-        { x: cx, y: cy - r },      // top (ASK)
-        { x: cx + r, y: cy },      // right (CHECK)
-        { x: cx, y: cy + r },      // bottom (RUN)
-        { x: cx - r, y: cy }       // left (SEE)
-      ];
-
-      const step = CORE_STEPS[this.currentStep] || { color: 'gold' };
-      const color = this.phase === 'ambient' ? '#ffd700' :
-                    step.color === 'cyan' ? '#00d4ff' :
-                    step.color === 'coral' ? '#ff6b4a' : '#ffd700';
-
-      const rgb = this.hexToRgb(color);
-
-      this.particles.forEach(particle => {
-        particle.progress += particle.speed;
-        if (particle.progress > 1) particle.progress = 0;
-
-        const totalProgress = particle.progress * 4;
-        const segmentIndex = Math.floor(totalProgress) % 4;
-        const segmentProgress = totalProgress - segmentIndex;
-
-        const from = points[segmentIndex];
-        const to = points[(segmentIndex + 1) % 4];
-
-        const x = from.x + (to.x - from.x) * segmentProgress;
-        const y = from.y + (to.y - from.y) * segmentProgress;
-
-        this.ctx.beginPath();
-        this.ctx.arc(x, y, particle.size, 0, Math.PI * 2);
-        this.ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${particle.opacity * (this.phase === 'ambient' ? 0.4 : 0.6)})`;
-        this.ctx.fill();
-      });
-
-      this.animationFrame = requestAnimationFrame(() => this.animateParticles());
-    }
-
-    hexToRgb(hex) {
-      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-      } : { r: 255, g: 215, b: 0 };
-    }
+    });
   }
 
-  // Initialize
   function init() {
     const container = document.querySelector('.system-overview__diagram');
-    if (container) {
-      new SystemDiagram(container);
-    }
+    if (container) render(container);
   }
 
   if (document.readyState === 'loading') {
