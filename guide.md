@@ -42,22 +42,51 @@ async function agent(
       messages, tools
     );
 
-    if (response.done) {
-      return response.result;
-    }
-
     for (const call of response.toolCalls) {
-      const result = await execute(call);
-      messages.push({
-        ...result,
-        ephemeral: true
-      });
+      try {
+        const result = await execute(call);
+        messages.push({
+          ...result,
+          ephemeral: true
+        });
+      } catch (e) {
+        if (e instanceof TaskComplete) {
+          return e.result;  // Clean exit
+        }
+        throw e;
+      }
     }
   }
 }
 ```
 
-The entire agent architecture. The stochastic part is three lines. Everything else is deterministic.
+The entire agent architecture. The stochastic part is three lines. Everything else is deterministic. Termination happens when the `done` tool throws `TaskComplete`—explicit, unambiguous, impossible to miss.
+
+### See it in action: Smart Purchase Advisor
+
+This guide includes a complete, working example: a laptop purchase advisor that demonstrates every pattern. As you read each section, you'll see how the theory maps to real code.
+
+The advisor takes requests like *"Find me a laptop under $1500 for programming"* and:
+1. Searches a product catalog
+2. Reviews candidates
+3. Compares specifications
+4. Makes a recommendation with reasoning
+
+It's 50 lines of core loop, plus tools, state management, and evaluation. The same patterns. The same architecture. Something you can run, modify, and learn from.
+
+```bash
+# Run with mock LLM (deterministic, no API key needed)
+npm run example:mock
+
+# Run evaluation suite
+npx tsx example/evaluation/runner.ts
+```
+
+**→ [Browse the example code](example/)**
+
+Throughout this guide, look for **"See it in action"** boxes that connect concepts to the Purchase Advisor implementation.
+
+---
 
 ## 01. The loop
 
@@ -97,6 +126,29 @@ while (!done) {
 ```
 
 This is Wiener's feedback loop, applied to LLMs.
+
+> **See it in action:** The Purchase Advisor implements this exact pattern in [`example/index.ts`](example/index.ts):
+>
+> ```typescript
+> // Main loop with iteration guard (Pattern 1.1: The Loop)
+> for (let iteration = 1; iteration <= maxIterations; iteration++) {
+>   // 1. GENERATE: Query the LLM with current context
+>   const response = await llm.invoke(messages, tools);
+>
+>   // 2. CHECK: Handle text responses without tool calls
+>   if (response.toolCalls.length === 0) { continue; }
+>
+>   // 3. EXECUTE: Run tool calls, catch TaskComplete
+>   for (const call of response.toolCalls) {
+>     const result = await tool.execute(call.arguments);
+>     messages.push({ role: 'tool', content: result, tool_call_id: call.id });
+>   }
+>
+>   // 4. Loop continues - observe → act → adjust
+> }
+> ```
+>
+> The four phases map directly: GENERATE asks "what next?", CHECK validates, EXECUTE runs tools, and the loop feeds results back for the next iteration. Same architecture, same ~50 lines.
 
 ## 02. The prompt
 
@@ -224,6 +276,17 @@ const getBrowserState: Tool = {
 ```
 
 Start generous. Restrict based on evidence.
+
+> **See it in action:** The Purchase Advisor has four tools that embody Ashby's Law—each handles a distinct aspect of the purchase decision:
+>
+> | Tool | Purpose | Why it exists |
+> |------|---------|---------------|
+> | `search_products` | Find candidates by criteria | Match variety of user requirements |
+> | `get_reviews` | Fetch detailed feedback | Handle quality assessment complexity |
+> | `compare_specs` | Side-by-side comparison | Enable multi-factor decisions |
+> | `done` | Signal completion | Explicit termination (Pattern 3.2) |
+>
+> See [`example/tools/`](example/tools/) for the implementation. The `done` tool throws `TaskComplete`—no ambiguity, no detection logic. The agent must explicitly declare "I'm finished."
 
 ### MCP: the de facto standard
 
@@ -433,6 +496,19 @@ class EventStore {
 }
 ```
 
+> **See it in action:** The Purchase Advisor implements event sourcing in [`example/state/event-store.ts`](example/state/event-store.ts). Every action becomes an event:
+>
+> ```typescript
+> // Events recorded during a typical run
+> { type: 'agent_started', task: 'Find laptop under $1500...' }
+> { type: 'tool_called', tool: 'search_products', arguments: { maxPrice: 1500 } }
+> { type: 'tool_result', tool: 'search_products', success: true, durationMs: 12 }
+> { type: 'tool_called', tool: 'get_reviews', arguments: { productId: 'laptop-001' } }
+> { type: 'agent_completed', success: true, totalIterations: 3 }
+> ```
+>
+> State is never mutated—`deriveState(events)` replays the log to compute current status, tool call counts, and errors. Run `npm run example:mock` and watch the event log summary at the end.
+
 ### Context management
 
 [Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents "Effective Context Engineering") calls context a finite, precious resource. [Jason Liu](https://jxnl.co/writing/2025/08/30/context-engineering-compaction/ "Context Engineering: Compaction") frames compaction as preserving "optimization trajectories": the reasoning path that got you here.
@@ -607,6 +683,22 @@ LLM judges scale evaluation beyond what humans can review and catch subtle issue
 ### Variance matters
 
 A 70% success rate with 5% variance is more useful than 85% success with 30% variance. Report confidence intervals. Track variance over time. A change that increases mean performance but also increases variance may not be an improvement.
+
+> **See it in action:** The Purchase Advisor includes a complete evaluation framework in [`example/evaluation/runner.ts`](example/evaluation/runner.ts). It defines scenarios with varying difficulty:
+>
+> | Difficulty | Example Task | Expected Success |
+> |------------|--------------|------------------|
+> | Easy | "Laptop under $1500 for programming" | 80-100% |
+> | Medium | "Gaming laptop with 32GB RAM under $1500" | 50-80% |
+> | Hard | "Linux laptop under $600 with good GPU" | 30-60% |
+>
+> Run it with:
+> ```bash
+> npx tsx example/evaluation/runner.ts --mock    # Mock LLM, deterministic
+> npx tsx example/evaluation/runner.ts --full    # All 8 scenarios
+> ```
+>
+> Each scenario runs multiple times, computing success rates and confidence intervals—not pass/fail assertions. The criteria validate against actual product data in `example/data/products.json`.
 
 ## 08. Operations
 

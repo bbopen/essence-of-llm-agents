@@ -9,5 +9,9 @@ dist/
 # Dependencies
 node_modules/
 
+# Environment files (contain secrets)
+.env.local
+.env
+
 # OS files
 .DS_Store

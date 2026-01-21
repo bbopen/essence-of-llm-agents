@@ -36,6 +36,9 @@ export interface Message {
   /** Tool call ID this message is responding to (for role: 'tool') */
   tool_call_id?: string;
 
+  /** Tool calls made by assistant (for role: 'assistant') */
+  tool_calls?: ToolCall[];
+
   /** Mark as prunable for context management. Not part of OpenAI spec. */
   ephemeral?: boolean;
 
@@ -295,7 +298,7 @@ export interface AgentCompletedEvent extends BaseEvent {
   type: 'agent_completed';
   result: string;
   success: boolean;
-  totalTokens: number;
+  totalIterations: number;
   totalDurationMs: number;
 }
 
@@ -315,6 +318,13 @@ export interface ToolResultEvent extends BaseEvent {
   durationMs: number;
 }
 
+export interface StateChangedEvent extends BaseEvent {
+  type: 'state_changed';
+  key: string;
+  oldValue: unknown;
+  newValue: unknown;
+}
+
 export interface ErrorOccurredEvent extends BaseEvent {
   type: 'error_occurred';
   error: string;
@@ -328,6 +338,7 @@ export type AgentEvent =
   | AgentCompletedEvent
   | ToolCalledEvent
   | ToolResultEvent
+  | StateChangedEvent
   | ErrorOccurredEvent;
 
 // =============================================================================

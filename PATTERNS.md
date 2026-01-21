@@ -118,15 +118,17 @@ async function agent(
     // 1. GENERATE: Query the stochastic generator
     const response = await llm.invoke(messages, tools);
 
-    // 2. CHECK TERMINATION: Explicit done signal
-    if (response.done) {
-      return response.result;
-    }
-
-    // 3. EXECUTE: Run tool calls
+    // 2. EXECUTE: Run tool calls (may throw TaskComplete)
     for (const call of response.toolCalls) {
-      const result = await execute(call);
-      messages.push({ role: 'tool', content: result });
+      try {
+        const result = await execute(call);
+        messages.push({ role: 'tool', content: result });
+      } catch (e) {
+        if (e instanceof TaskComplete) {
+          return e.result;  // 3. TERMINATE: Clean exit via exception
+        }
+        throw e;
+      }
     }
     // 4. Loop continues (observe → act → adjust)
   }
