@@ -535,10 +535,10 @@ User: "Find me a laptop under $1500 for programming"
 │    ┌─────────────────────────────────────────────────────────────┐ │
 │    │ Spec Worker Loop:                                           │ │
 │    │   → search_products({query: "laptop programming", maxPrice: 1500})│
-│    │   ← [5 products match]                                      │ │
-│    │   → compare_specs({ids: ["001", "002", "003", "004", "005"]})│
-│    │   ← [comparison table]                                      │ │
-│    │   → done({result: "Top 3 candidates: ..."})                 │ │
+│    │   ← [5 products: laptop-001, laptop-003, laptop-007, ...]   │ │
+│    │   → compare_specs({ids: [/* all 5 matching products */]})   │ │
+│    │   ← [comparison table with specs side-by-side]              │ │
+│    │   → done({result: "Top 3: laptop-001, laptop-007, laptop-015"})│
 │    └─────────────────────────────────────────────────────────────┘ │
 │                                                                     │
 │    Result: ["laptop-001", "laptop-007", "laptop-015"]              │
