@@ -2,5 +2,11 @@
 screenshots/
 scripts/
 
+# Build output
+dist/
+
+# Dependencies
+node_modules/
+
 # OS files
 .DS_Store
