@@ -1,6 +1,15 @@
-# Production Agent Guide
+# The Essence of LLM Agentic Systems
 
-TypeScript patterns for autonomous agents. Based on dozens of research reports and theory going back to 1948.
+**A Pattern Reference**
+
+*Last updated: January 2026*
+
+> "I would not give a fig for the simplicity on this side of complexity, but I would give my life for the simplicity on the other side of complexity."
+> — Oliver Wendell Holmes
+
+Methods and frameworks evolve rapidly. This guide focuses on the *essence*—patterns derived from control theory, cybernetics, and production experience that remain stable even as implementations change. The goal is not to prescribe a framework, but to explain *why* these patterns exist so you can make informed choices.
+
+---
 
 ## Someone already figured this out
 
