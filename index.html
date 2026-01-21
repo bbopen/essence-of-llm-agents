@@ -111,22 +111,53 @@
 <span class="line stochastic">      messages, tools</span>
 <span class="line stochastic">    );</span>
 <span class="line"></span>
-<span class="line">    <span class="kw">if</span> (response.done) { <span class="note" data-note="The LLM must actively say 'I'm done' by calling a done tool. If you exit when there are no tool calls, agents quit when confused instead of asking for help.">// explicit exit only</span></span>
-<span class="line">      <span class="kw">return</span> response.result;</span>
-<span class="line">    }</span>
-<span class="line"></span>
 <span class="line deterministic">    <span class="kw">for</span> (<span class="kw">const</span> call <span class="kw">of</span> response.toolCalls) { <span class="note" data-note="Tool execution is YOUR code, not the LLM's. You validate inputs. You handle errors. You decide what actually runs. The LLM only suggested it.">// DETERMINISTIC</span></span>
-<span class="line deterministic">      <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">execute</span>(call); <span class="note" data-note="Your execute() function runs the tool. Add validation, rate limiting, sandboxing here. This is where Brooks' safety layers live.">// your code runs</span></span>
-<span class="line deterministic">      messages.<span class="fn">push</span>({ <span class="note" data-note="Push the result back into the conversation so the LLM can see what happened. This closes the feedback loop.">// observation</span></span>
-<span class="line deterministic">        ...result,</span>
-<span class="line deterministic">        ephemeral: <span class="kw">true</span> <span class="note" data-note="Mark results that can be dropped when context runs low. Browser screenshots are 50KB each. After 20 calls, you have 1MB of stale DOM. Keep only recent ones.">// can be pruned</span></span>
-<span class="line deterministic">      });</span>
+<span class="line deterministic">      <span class="kw">try</span> {</span>
+<span class="line deterministic">        <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">execute</span>(call); <span class="note" data-note="Your execute() function runs the tool. Add validation, rate limiting, sandboxing here. This is where Brooks' safety layers live.">// your code runs</span></span>
+<span class="line deterministic">        messages.<span class="fn">push</span>({ <span class="note" data-note="Push the result back into the conversation so the LLM can see what happened. This closes the feedback loop.">// observation</span></span>
+<span class="line deterministic">          ...result,</span>
+<span class="line deterministic">          ephemeral: <span class="kw">true</span> <span class="note" data-note="Mark results that can be dropped when context runs low. Browser screenshots are 50KB each. After 20 calls, you have 1MB of stale DOM. Keep only recent ones.">// can be pruned</span></span>
+<span class="line deterministic">        });</span>
+<span class="line deterministic">      } <span class="kw">catch</span> (e) { <span class="note" data-note="The done tool throws TaskComplete. Catching it here means termination is explicit—the agent must actively signal completion, not just stop calling tools.">// explicit termination</span></span>
+<span class="line deterministic">        <span class="kw">if</span> (e <span class="kw">instanceof</span> <span class="fn">TaskComplete</span>) {</span>
+<span class="line deterministic">          <span class="kw">return</span> e.result; <span class="note" data-note="Clean exit via exception. The done tool owns termination. This pattern is self-contained—works with any LLM client without special detection logic.">// clean exit</span></span>
+<span class="line deterministic">        }</span>
+<span class="line deterministic">        <span class="kw">throw</span> e;</span>
+<span class="line deterministic">      }</span>
 <span class="line deterministic">    }</span>
 <span class="line">  } <span class="note" data-note="The loop continues until the LLM calls the done tool. There's no timeout here—that belongs in the ops layer wrapping this function.">// repeat forever</span></span>
 <span class="line">}</span></code></pre>
         </div>
 
-        <p class="caption">The entire agent architecture. The <span class="highlight--cyan">stochastic</span> part is three lines. Everything else is <span class="highlight--coral">deterministic</span>.</p>
+        <p class="caption">The entire agent architecture. The <span class="highlight--cyan">stochastic</span> part is three lines. Everything else is <span class="highlight--coral">deterministic</span>. Termination happens when the <code class="inline-code">done</code> tool throws <code class="inline-code">TaskComplete</code>—explicit, unambiguous, impossible to miss.</p>
+
+        <!-- Smart Purchase Advisor Introduction -->
+        <div class="example-intro">
+          <h3>See it in action: Smart Purchase Advisor</h3>
+          <p>This guide includes a complete, working example: a laptop purchase advisor that demonstrates every pattern. As you read each section, you'll see how the theory maps to real code.</p>
+
+          <p>The advisor takes requests like <em>"Find me a laptop under $1500 for programming"</em> and:</p>
+          <ol>
+            <li>Searches a product catalog</li>
+            <li>Reviews candidates</li>
+            <li>Compares specifications</li>
+            <li>Makes a recommendation with reasoning</li>
+          </ol>
+
+          <p>It's 50 lines of core loop, plus tools, state management, and evaluation. The same patterns. The same architecture. Something you can run, modify, and learn from.</p>
+
+          <div class="code-block" data-title="terminal">
+            <pre><code><span class="line"><span class="comment"># Run with mock LLM (deterministic, no API key needed)</span></span>
+<span class="line">npm run example:mock</span>
+<span class="line"></span>
+<span class="line"><span class="comment"># Run evaluation suite</span></span>
+<span class="line">npx tsx example/evaluation/runner.ts</span></code></pre>
+          </div>
+
+          <p><strong>→ <a href="example/" class="example-link">Browse the example code</a></strong></p>
+
+          <p class="example-note">Throughout this guide, look for <strong>"See it in action"</strong> boxes that connect concepts to the Purchase Advisor implementation.</p>
+        </div>
       </div>
     </section>
 
@@ -170,6 +201,31 @@
 <span class="line">} <span class="note" data-note="That's the entire pattern. Observe → Act → Observe. Wiener described this for anti-aircraft guns in 1948. It hasn't changed.">// that's it</span></span></code></pre>
         </div>
         <p class="caption">This is Wiener's feedback loop, applied to LLMs.</p>
+
+        <!-- See it in action: The Loop -->
+        <div class="example-callout">
+          <h4>See it in action</h4>
+          <p>The Purchase Advisor implements this exact pattern in <a href="example/index.ts" class="example-link">example/index.ts</a>:</p>
+          <div class="code-block" data-title="example/index.ts (simplified)">
+            <pre><code><span class="line"><span class="cmt">// Main loop with iteration guard (Pattern 1.1: The Loop)</span></span>
+<span class="line"><span class="kw">for</span> (<span class="kw">let</span> iteration = <span class="num">1</span>; iteration <= maxIterations; iteration++) {</span>
+<span class="line">  <span class="cmt">// 1. GENERATE: Query the LLM with current context</span></span>
+<span class="line">  <span class="kw">const</span> response = <span class="kw">await</span> llm.<span class="fn">invoke</span>(messages, tools);</span>
+<span class="line"></span>
+<span class="line">  <span class="cmt">// 2. CHECK: Handle text responses without tool calls</span></span>
+<span class="line">  <span class="kw">if</span> (response.toolCalls.length === <span class="num">0</span>) { <span class="kw">continue</span>; }</span>
+<span class="line"></span>
+<span class="line">  <span class="cmt">// 3. EXECUTE: Run tool calls, catch TaskComplete</span></span>
+<span class="line">  <span class="kw">for</span> (<span class="kw">const</span> call <span class="kw">of</span> response.toolCalls) {</span>
+<span class="line">    <span class="kw">const</span> result = <span class="kw">await</span> tool.<span class="fn">execute</span>(call.arguments);</span>
+<span class="line">    messages.<span class="fn">push</span>({ role: <span class="str">'tool'</span>, content: result, tool_call_id: call.id });</span>
+<span class="line">  }</span>
+<span class="line"></span>
+<span class="line">  <span class="cmt">// 4. Loop continues - observe → act → adjust</span></span>
+<span class="line">}</span></code></pre>
+          </div>
+          <p>The four phases map directly: GENERATE asks "what next?", CHECK validates, EXECUTE runs tools, and the loop feeds results back for the next iteration. Same architecture, same ~50 lines.</p>
+        </div>
       </div>
     </section>
 
@@ -296,6 +352,24 @@
 <span class="line">};</span></code></pre>
         </div>
         <p class="caption">Start generous. Restrict based on evidence.</p>
+
+        <!-- See it in action: Tools -->
+        <div class="example-callout">
+          <h4>See it in action</h4>
+          <p>The Purchase Advisor has four tools that embody Ashby's Law—each handles a distinct aspect of the purchase decision:</p>
+          <table class="example-table">
+            <thead>
+              <tr><th>Tool</th><th>Purpose</th><th>Why it exists</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code class="inline-code">search_products</code></td><td>Find candidates by criteria</td><td>Match variety of user requirements</td></tr>
+              <tr><td><code class="inline-code">get_reviews</code></td><td>Fetch detailed feedback</td><td>Handle quality assessment complexity</td></tr>
+              <tr><td><code class="inline-code">compare_specs</code></td><td>Side-by-side comparison</td><td>Enable multi-factor decisions</td></tr>
+              <tr><td><code class="inline-code">done</code></td><td>Signal completion</td><td>Explicit termination (Pattern 3.2)</td></tr>
+            </tbody>
+          </table>
+          <p>See <a href="example/tools/" class="example-link">example/tools/</a> for the implementation. The <code class="inline-code">done</code> tool throws <code class="inline-code">TaskComplete</code>—no ambiguity, no detection logic. The agent must explicitly declare "I'm finished."</p>
+        </div>
 
         <h3>MCP: the de facto standard</h3>
         <p><a href="https://modelcontextprotocol.io/specification/2025-11-25" class="citation" title="MCP Specification"><span class="highlight--cyan">Model Context Protocol</span></a> won. <a href="https://npmtrends.com/@modelcontextprotocol/sdk" class="citation" title="MCP SDK npm trends">~40 million monthly SDK downloads</a> as of January 2026. <a href="https://www.anthropic.com/news/model-context-protocol-a2a-linux-foundation" class="citation" title="MCP joins Linux Foundation">Donated to the Linux Foundation</a> December 2025. Think of it as USB-C for AI—one protocol for many capabilities.</p>
@@ -495,6 +569,20 @@
 <span class="line">}</span></code></pre>
         </div>
 
+        <!-- See it in action: State -->
+        <div class="example-callout">
+          <h4>See it in action</h4>
+          <p>The Purchase Advisor implements event sourcing in <a href="example/state/event-store.ts" class="example-link">example/state/event-store.ts</a>. Every action becomes an event:</p>
+          <div class="code-block" data-title="Events recorded during a typical run">
+            <pre><code><span class="line">{ type: <span class="str">'agent_started'</span>, task: <span class="str">'Find laptop under $1500...'</span> }</span>
+<span class="line">{ type: <span class="str">'tool_called'</span>, tool: <span class="str">'search_products'</span>, arguments: { maxPrice: <span class="num">1500</span> } }</span>
+<span class="line">{ type: <span class="str">'tool_result'</span>, tool: <span class="str">'search_products'</span>, success: <span class="kw">true</span>, durationMs: <span class="num">12</span> }</span>
+<span class="line">{ type: <span class="str">'tool_called'</span>, tool: <span class="str">'get_reviews'</span>, arguments: { productId: <span class="str">'laptop-001'</span> } }</span>
+<span class="line">{ type: <span class="str">'agent_completed'</span>, success: <span class="kw">true</span>, totalIterations: <span class="num">3</span> }</span></code></pre>
+          </div>
+          <p>State is never mutated—<code class="inline-code">deriveState(events)</code> replays the log to compute current status, tool call counts, and errors. Run <code class="inline-code">npm run example:mock</code> and watch the event log summary at the end.</p>
+        </div>
+
         <h3>Context management</h3>
         <p><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" class="citation" title="Effective Context Engineering"><span class="highlight--cyan">Anthropic</span></a> calls context a finite, precious resource. <a href="https://jxnl.co/writing/2025/08/30/context-engineering-compaction/" class="citation" title="Context Engineering: Compaction">Jason Liu</a> frames compaction as preserving "optimization trajectories"—the reasoning path that got you here.</p>
         <p>Based on these insights, we prioritize (our synthesis):</p>
@@ -680,6 +768,28 @@
 
         <h3>Variance matters</h3>
         <p>A 70% success rate with 5% variance is more useful than 85% success with 30% variance. Report confidence intervals. Track variance over time. A change that increases mean performance but also increases variance may not be an improvement.</p>
+
+        <!-- See it in action: Evaluation -->
+        <div class="example-callout">
+          <h4>See it in action</h4>
+          <p>The Purchase Advisor includes a complete evaluation framework in <a href="example/evaluation/runner.ts" class="example-link">example/evaluation/runner.ts</a>. It defines scenarios with varying difficulty:</p>
+          <table class="example-table">
+            <thead>
+              <tr><th>Difficulty</th><th>Example Task</th><th>Expected Success</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Easy</td><td>"Laptop under $1500 for programming"</td><td>80-100%</td></tr>
+              <tr><td>Medium</td><td>"Gaming laptop with 32GB RAM under $1500"</td><td>50-80%</td></tr>
+              <tr><td>Hard</td><td>"Linux laptop under $600 with good GPU"</td><td>30-60%</td></tr>
+            </tbody>
+          </table>
+          <p>Run it with:</p>
+          <div class="code-block" data-title="terminal">
+            <pre><code><span class="line">npx tsx example/evaluation/runner.ts --mock    <span class="cmt"># Mock LLM, deterministic</span></span>
+<span class="line">npx tsx example/evaluation/runner.ts --full    <span class="cmt"># All 8 scenarios</span></span></code></pre>
+          </div>
+          <p>Each scenario runs multiple times, computing success rates and confidence intervals—not pass/fail assertions. The criteria validate against actual product data in <code class="inline-code">example/data/products.json</code>.</p>
+        </div>
       </div>
     </section>
 

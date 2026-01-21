@@ -54,17 +54,34 @@ const doneTool: Tool = {
 async function agentWithExplicitTermination(
   task: string,
   tools: Tool[],
-  llm: { invoke: (messages: Array<{ role: string; content: string }>, tools: Tool[]) => Promise<{ toolCalls: Array<{ name: string; arguments: Record<string, unknown> }> }> },
+  llm: { invoke: (messages: Array<{ role: string; content: string }>, tools: Tool[]) => Promise<{ toolCalls: Array<{ id: string; name: string; arguments: Record<string, unknown> }> }> },
   maxIterations: number = 100
 ): Promise<string> {
   // Always include the done tool
   const allTools = [...tools, doneTool];
-  const messages: Array<{ role: string; content: string }> = [
+  // Message type must support tool_calls for assistant messages
+  // and tool_call_id for tool result messages (see Pattern 1.1)
+  const messages: Array<{
+    role: string;
+    content: string;
+    tool_calls?: Array<{ id: string; name: string; arguments: Record<string, unknown> }>;
+    tool_call_id?: string;
+  }> = [
     { role: 'user', content: task }
   ];
 
   for (let i = 0; i < maxIterations; i++) {
     const response = await llm.invoke(messages, allTools);
+
+    // Add assistant message with tool_calls before processing results.
+    // This is required by LLM APIs - see Pattern 1.1 for detailed explanation.
+    if (response.toolCalls.length > 0) {
+      messages.push({
+        role: 'assistant',
+        content: '',
+        tool_calls: response.toolCalls,
+      });
+    }
 
     for (const call of response.toolCalls) {
       const tool = allTools.find(t => t.name === call.name);
@@ -72,7 +89,7 @@ async function agentWithExplicitTermination(
 
       try {
         const result = await tool.execute(call.arguments);
-        messages.push({ role: 'tool', content: result });
+        messages.push({ role: 'tool', content: result, tool_call_id: call.id });
       } catch (error) {
         if (error instanceof TaskComplete) {
           // Clean termination via done tool
