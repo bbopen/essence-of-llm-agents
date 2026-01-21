@@ -126,11 +126,10 @@ This example demonstrates the **coordinator-worker pattern** with full security,
 │  ┌─────────────────────────────────────────────────────────────┐   │
 │  │  Product Catalog (data/products.json)                       │   │
 │  │  • 30 laptops with specs, prices, ratings                   │   │
-│  │  • Some with missing data (tests error handling)            │   │
 │  │  • Price range: $449 - $2,499                               │   │
 │  │                                                             │   │
 │  │  Reviews Database (data/reviews.json)                       │   │
-│  │  • 2-5 reviews per product                                  │   │
+│  │  • 2-3 reviews per product                                  │   │
 │  │  • Mix of positive, negative, detailed, brief               │   │
 │  │  • Some contradictory (tests verification)                  │   │
 │  │                                                             │   │
@@ -430,9 +429,9 @@ async function runEvaluation(
 ```
 
 **Design considerations:**
+
 - Range from budget ($449) to premium ($2,499)
 - Mix of brands, specs, use cases
-- Some products have missing fields (tests validation)
 - Some have identical specs but different prices (tests comparison)
 
 ### Reviews Database (`data/reviews.json`)
@@ -467,8 +466,8 @@ async function runEvaluation(
 
 **Design considerations:**
 
-- 2-5 reviews per product
-- Mix of verified/unverified
+- 2-3 reviews per product
+- Mix of verified/unverified (26 verified, 7 unverified)
 - Some contradictory opinions (tests synthesis)
 - Varying detail levels
 
@@ -575,13 +574,13 @@ User: "Find me a laptop under $1500 for programming"
 │                                                                     │
 │    "Based on your requirements ($1500 budget, programming use):    │
 │                                                                     │
-│    BEST VALUE: Dell XPS 15 ($1,299)                                │
-│    - 16GB RAM, i7, great keyboard                                  │
-│    - Reviews praise build quality                                  │
+│    BEST VALUE: laptop-007                                          │
+│    - Good specs at a lower price point                             │
+│    - Reviews praise value for money                                │
 │                                                                     │
-│    PREMIUM OPTION: ThinkPad X1 Carbon ($1,449)                     │
+│    PREMIUM OPTION: laptop-001 (ThinkPad X1 Carbon, $1,449)         │
 │    - Best-in-class keyboard for coding                             │
-│    - Slightly lighter, better battery                              │
+│    - Excellent build quality and battery                           │
 │                                                                     │
 │    Both are solid choices for programming."                        │
 └─────────────────────────────────────────────────────────────────────┘
