@@ -1867,7 +1867,7 @@ How patterns combine into complete systems.
 
 **Use When:** Demos, prototypes, simple automation
 
-```
+```text
 ┌─────────────────────────────────────┐
 │              The Loop               │
 │  ┌───────────┐      ┌───────────┐   │
@@ -1893,7 +1893,7 @@ How patterns combine into complete systems.
 
 **Use When:** Production systems, user-facing agents
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │                  Production Agent               │
 │  ┌─────────────────────────────────────────┐    │
@@ -1939,7 +1939,7 @@ All Production Agent patterns, plus:
 
 **Use When:** Complex tasks requiring specialization
 
-```
+```text
 ┌────────────────────────────────────────────────────────┐
 │                    Multi-Agent System                  │
 │                                                        │
@@ -1998,7 +1998,7 @@ All Production Agent patterns, plus:
 
 ### Appendix C: Decision Flowchart
 
-```
+```text
 START: New Agent Project
            │
            ↓
@@ -2057,7 +2057,7 @@ START: New Agent Project
 
 The architecture for autonomous agents was discovered in 1948. LLMs filled in the one line that couldn't exist before. Everything else (loops, guards, memory, safety, orchestration) was already known.
 
-This catalog documents patterns that work. They work because they're grounded in theory (Wiener, Ashby, Brooks) and validated by production experience. They're not opinions. They're attractor states that systems converge to.
+This catalog documents patterns that work. These patterns work because they're grounded in theory (Wiener, Ashby, Brooks) and validated by production experience. This is not opinion—these are attractor states that systems converge to.
 
 **Use these patterns. Avoid the anti-patterns. Ship agents that work.**
 

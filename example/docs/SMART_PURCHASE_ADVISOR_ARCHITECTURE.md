@@ -29,7 +29,7 @@ This example demonstrates the **coordinator-worker pattern** with full security,
 
 ## Architecture Mapping to Guide Sections
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        OPERATIONS LAYER (08)                        │
 │  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  │
@@ -146,7 +146,7 @@ This example demonstrates the **coordinator-worker pattern** with full security,
 
 ## File Structure
 
-```
+```text
 example/
 ├── index.ts                    # Entry point - run the advisor
 ├── run.ts                      # CLI wrapper with argument parsing
@@ -212,6 +212,7 @@ Build the basic agent loop with synthetic data tools.
 - `example/llm/mock-client.ts` - Returns scripted responses for testing
 
 **Pattern reuse:**
+
 ```typescript
 // example/tools/search-products.ts
 import { validate, ValidatedTool } from '../../patterns/06-tool-validation';
@@ -243,6 +244,7 @@ Implement the coordinator-worker pattern.
 - `example/coordinator/purchase-advisor.ts`
 
 **Pattern reuse:**
+
 ```typescript
 // example/coordinator/purchase-advisor.ts
 import { Coordinator, Subtask } from '../../patterns/14-coordinator';
@@ -292,6 +294,7 @@ Add safety layers and validation.
 - `example/security/layers.ts`
 
 **Pattern reuse:**
+
 ```typescript
 // example/security/layers.ts
 import { checkAllLayers, LayerCheck } from '../../patterns/10-subsumption-layers';
@@ -325,6 +328,7 @@ Add event sourcing and context management.
 - `example/state/context-manager.ts`
 
 **Pattern reuse:**
+
 ```typescript
 // example/state/context-manager.ts
 import { pruneEphemeral, EphemeralConfig } from '../../patterns/03-ephemeral-messages';
@@ -342,6 +346,7 @@ const ephemeralConfig: EphemeralConfig = {
 Add retry, circuit breaker, budgets.
 
 **Pattern reuse:**
+
 ```typescript
 // example/ops/retry.ts
 import { withRetry, RetryConfig } from '../../patterns/11-retry-backoff';
@@ -479,7 +484,7 @@ async function runEvaluation(
 | Untrusted Input | ✓ | Product data (simulated "web" content) |
 | External Actions | ✗ | Read-only research, no purchase capability |
 
-**Risk Level: MEDIUM (2/3)**
+#### Risk Level: MEDIUM (2/3)
 
 By design, we break the trifecta by excluding purchase capability. The advisor researches and recommends—the user makes the final purchase decision themselves.
 
@@ -515,7 +520,7 @@ const safeAdvisor = {
 
 ## Example Execution Flow
 
-```
+```text
 User: "Find me a laptop under $1500 for programming"
 
 ┌─────────────────────────────────────────────────────────────────────┐
